@@ -5,6 +5,13 @@
     "maintainers": [
         {"name": "Caolan McMahon", "web": "https://github.com/caolan"}
     ],
+    "dependencies": {
+        "tar": "0.1.13",
+        "fstream-ignore": "0.0.5"
+    },
+    "devDependencies": {
+        "nodeunit": "0.7.4"
+    },
     "repository": {
         "type": "git",
         "url": "http://github.com/caolan/jam.git"
