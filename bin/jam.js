@@ -24,9 +24,11 @@ jamrc.load(function (err, settings) {
         console.log('Available commands:');
         var len = utils.longest(Object.keys(commands));
         for (var k in commands) {
-            console.log(
-                '  ' + utils.padRight(k, len) + '    ' + commands[k].summary
-            );
+            if (!commands[k].hidden) {
+                console.log(
+                    '  ' + utils.padRight(k, len) + '    ' + commands[k].summary
+                );
+            }
         }
         logger.clean_exit = true;
     }
