@@ -8,6 +8,7 @@
     "dependencies": {
         "tar": "0.1.13",
         "fstream-ignore": "0.0.5",
+        "fstream": "0.1.18",
         "mkdirp": "0.3.2",
         "inherits": "1.0.0",
         "async": "0.1.21",
