@@ -38,3 +38,10 @@ Unlike other repositories, we put the **browser** first by using
 ```
 
 [Learn more...](http://groundcomputing.co.uk/code/jam)
+
+
+## Installation
+
+    # npm install -g jamjs
+
+Requires [node.js](http://nodejs.org)
