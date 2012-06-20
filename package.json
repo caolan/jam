@@ -19,7 +19,8 @@
         "semver": "1.0.9",
         "ncp": "0.2.6",
         "requirejs": "1.0.8",
-        "almond": "0.0.3"
+        "almond": "0.0.3",
+        "request": "2.9.202"
     },
     "devDependencies": {
         "nodeunit": "0.7.4"
