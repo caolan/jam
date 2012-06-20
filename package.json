@@ -1,6 +1,6 @@
 {
     "name": "jamjs",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "",
     "maintainers": [
         {"name": "Caolan McMahon", "web": "https://github.com/caolan"}
