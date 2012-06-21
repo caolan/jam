@@ -29,7 +29,7 @@
         "type": "git",
         "url": "http://github.com/caolan/jam.git"
     },
-    "engines": {"node": "0.6.x"},
+    "engines": {"node": ">= 0.6.x"},
     "bugs": {"url": "http://github.com/caolan/jam/issues"},
     "bin": {
         "jam": "./bin/jam.js"
