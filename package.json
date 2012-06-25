@@ -20,7 +20,8 @@
         "ncp": "0.2.6",
         "requirejs": "2.0.2",
         "almond": "0.0.3",
-        "request": "2.9.202"
+        "request": "2.9.202",
+        "minimatch": "0.2.5"
     },
     "devDependencies": {
         "nodeunit": "0.7.4"
