@@ -18,7 +18,7 @@
         "rimraf": "2.0.1",
         "semver": "1.0.9",
         "ncp": "0.2.6",
-        "requirejs": "2.0.2",
+        "requirejs": "2.0.4",
         "almond": "0.0.3",
         "request": "2.9.202",
         "minimatch": "0.2.5"
