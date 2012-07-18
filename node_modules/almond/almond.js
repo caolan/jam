@@ -1,24 +1,21 @@
 /**
- * almond 0.0.3 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
+ * almond 0.1.1 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  */
-/*jslint strict: false, plusplus: false */
+//Going sloppy to avoid 'use strict' string cost, but strict practices should
+//be followed.
+/*jslint sloppy: true */
 /*global setTimeout: false */
 
 var requirejs, require, define;
 (function (undef) {
-
     var defined = {},
         waiting = {},
+        config = {},
+        defining = {},
         aps = [].slice,
         main, req;
-
-    if (typeof define === "function") {
-        //If a define is already in play via another AMD loader,
-        //do not overwrite.
-        return;
-    }
 
     /**
      * Given a relative module name, like ./something, normalize it to
@@ -29,6 +26,11 @@ var requirejs, require, define;
      * @returns {String} normalized name
      */
     function normalize(name, baseName) {
+        var baseParts = baseName && baseName.split("/"),
+            map = config.map,
+            starMap = (map && map['*']) || {},
+            nameParts, nameSegment, mapValue, foundMap, i, j, part;
+
         //Adjust any relative paths.
         if (name && name.charAt(0) === ".") {
             //If have a base name, try to normalize against it,
@@ -40,13 +42,11 @@ var requirejs, require, define;
                 //module. For instance, baseName of "one/two/three", maps to
                 //"one/two/three.js", but we want the directory, "one/two" for
                 //this normalization.
-                baseName = baseName.split("/");
-                baseName = baseName.slice(0, baseName.length - 1);
+                baseParts = baseParts.slice(0, baseParts.length - 1);
 
-                name = baseName.concat(name.split("/"));
+                name = baseParts.concat(name.split("/"));
 
                 //start trimDots
-                var i, part;
                 for (i = 0; (part = name[i]); i++) {
                     if (part === ".") {
                         name.splice(i, 1);
@@ -59,7 +59,7 @@ var requirejs, require, define;
                             //no path mapping for a path starting with '..'.
                             //This can still fail, but catches the most reasonable
                             //uses of ..
-                            break;
+                            return true;
                         } else if (i > 0) {
                             name.splice(i - 1, 2);
                             i -= 2;
@@ -71,6 +71,43 @@ var requirejs, require, define;
                 name = name.join("/");
             }
         }
+
+        //Apply map config if available.
+        if ((baseParts || starMap) && map) {
+            nameParts = name.split('/');
+
+            for (i = nameParts.length; i > 0; i -= 1) {
+                nameSegment = nameParts.slice(0, i).join("/");
+
+                if (baseParts) {
+                    //Find the longest baseName segment match in the config.
+                    //So, do joins on the biggest to smallest lengths of baseParts.
+                    for (j = baseParts.length; j > 0; j -= 1) {
+                        mapValue = map[baseParts.slice(0, j).join('/')];
+
+                        //baseName segment has  config, find if it has one for
+                        //this name.
+                        if (mapValue) {
+                            mapValue = mapValue[nameSegment];
+                            if (mapValue) {
+                                //Match, update name to the new value.
+                                foundMap = mapValue;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                foundMap = foundMap || starMap[nameSegment];
+
+                if (foundMap) {
+                    nameParts.splice(0, i, foundMap);
+                    name = nameParts.join('/');
+                    break;
+                }
+            }
+        }
+
         return name;
     }
 
@@ -99,7 +136,12 @@ var requirejs, require, define;
         if (waiting.hasOwnProperty(name)) {
             var args = waiting[name];
             delete waiting[name];
+            defining[name] = true;
             main.apply(undef, args);
+        }
+
+        if (!defined.hasOwnProperty(name)) {
+            throw new Error('No ' + name);
         }
         return defined[name];
     }
@@ -136,27 +178,27 @@ var requirejs, require, define;
         };
     }
 
+    function makeConfig(name) {
+        return function () {
+            return (config && config.config && config.config[name]) || {};
+        };
+    }
+
     main = function (name, deps, callback, relName) {
         var args = [],
             usingExports,
-            cjsModule, depName, i, ret, map;
+            cjsModule, depName, ret, map, i;
 
         //Use name if no relName
-        if (!relName) {
-            relName = name;
-        }
+        relName = relName || name;
 
         //Call the callback to define the module, if necessary.
         if (typeof callback === 'function') {
 
-            //Default to require, exports, module if no deps if
-            //the factory arg has any arguments specified.
-            if (!deps.length && callback.length) {
-                deps = ['require', 'exports', 'module'];
-            }
-
             //Pull out the defined dependencies and pass the ordered
             //values to the callback.
+            //Default to [require, exports, module] if no deps
+            deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
             for (i = 0; i < deps.length; i++) {
                 map = makeMap(deps[i], relName);
                 depName = map.f;
@@ -173,15 +215,16 @@ var requirejs, require, define;
                     cjsModule = args[i] = {
                         id: name,
                         uri: '',
-                        exports: defined[name]
+                        exports: defined[name],
+                        config: makeConfig(name)
                     };
                 } else if (defined.hasOwnProperty(depName) || waiting.hasOwnProperty(depName)) {
                     args[i] = callDep(depName);
                 } else if (map.p) {
                     map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
                     args[i] = defined[depName];
-                } else {
-                    throw name + ' missing ' + depName;
+                } else if (!defining[depName]) {
+                    throw new Error(name + ' missing ' + depName);
                 }
             }
 
@@ -191,9 +234,10 @@ var requirejs, require, define;
                 //If setting exports via "module" is in play,
                 //favor that over return value and exports. After that,
                 //favor a non-undefined return value over exports use.
-                if (cjsModule && cjsModule.exports !== undef) {
+                if (cjsModule && cjsModule.exports !== undef &&
+                    cjsModule.exports !== defined[name]) {
                     defined[name] = cjsModule.exports;
-                } else if (!usingExports) {
+                } else if (ret !== undef || !usingExports) {
                     //Use the return value from the function.
                     defined[name] = ret;
                 }
@@ -205,9 +249,8 @@ var requirejs, require, define;
         }
     };
 
-    requirejs = req = function (deps, callback, relName, forceSync) {
+    requirejs = require = req = function (deps, callback, relName, forceSync) {
         if (typeof deps === "string") {
-
             //Just return the module wanted. In this scenario, the
             //deps arg is the module name, and second arg (if passed)
             //is just the relName.
@@ -215,16 +258,20 @@ var requirejs, require, define;
             return callDep(makeMap(deps, callback).f);
         } else if (!deps.splice) {
             //deps is a config object, not an array.
-            //Drop the config stuff on the ground.
+            config = deps;
             if (callback.splice) {
                 //callback is an array, which means it is a dependency list.
                 //Adjust args if there are dependencies
                 deps = callback;
-                callback = arguments[2];
+                callback = relName;
+                relName = null;
             } else {
-                deps = [];
+                deps = undef;
             }
         }
+
+        //Support require(['a'])
+        callback = callback || function () {};
 
         //Simulate async callback;
         if (forceSync) {
@@ -242,16 +289,10 @@ var requirejs, require, define;
      * Just drops the config on the floor, but returns req in case
      * the config return value is used.
      */
-    req.config = function () {
+    req.config = function (cfg) {
+        config = cfg;
         return req;
     };
-
-    /**
-     * Export require as a global, but only if it does not already exist.
-     */
-    if (!require) {
-        require = req;
-    }
 
     define = function (name, deps, callback) {
 
@@ -264,11 +305,7 @@ var requirejs, require, define;
             deps = [];
         }
 
-        if (define.unordered) {
-            waiting[name] = [name, deps, callback];
-        } else {
-            main(name, deps, callback);
-        }
+        waiting[name] = [name, deps, callback];
     };
 
     define.amd = {

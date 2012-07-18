@@ -19,7 +19,7 @@
         "semver": "1.0.9",
         "ncp": "0.2.6",
         "requirejs": "2.0.4",
-        "almond": "0.0.3",
+        "almond": "0.1.1",
         "request": "2.9.202",
         "minimatch": "0.2.5"
     },
