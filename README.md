@@ -44,3 +44,27 @@ Unlike other repositories, we put the **browser** first.
     # npm install -g jamjs
 
 Requires [node.js](http://nodejs.org)
+
+
+## Settings
+
+To customize Jam setting create `.jamrc` file in your home directory.
+
+Edit `/lib/jamrc.js` to change paths to `.jamrc` file and it's name.
+
+## .jamrc
+
+###repositories
+
+An array with npm repositiories. Jam uses `http://jamjs.org/repository` by default, but it's possible to create a local, e.g. corporate, repository.
+
+```exports.repositories = [
+    "http://mycorporation.com:5984/repository/"
+  , "http://jamjs.org/repository"
+];```
+
+###package_dir
+
+Output Jam directory (defaults to `./jam`).
+
+```exports.package_dir = 'libs';```
