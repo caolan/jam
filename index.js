@@ -2,11 +2,13 @@
  * Public API to Jam features
  */
 
-var jamrc = require('./lib/jamrc'),
+var ls = require('./lib/commands/ls'),
     install = require('./lib/commands/install'),
     upgrade = require('./lib/commands/upgrade'),
     remove = require('./lib/commands/remove'),
-    logger = require('./lib/logger');
+    logger = require('./lib/logger'),
+    jamrc = require('./lib/jamrc'),
+    path = require('path');
 
 
 // silence logger module by default
@@ -117,7 +119,7 @@ exports.upgrade = function (pdir, /*optional*/names, callback) {
  *
  * @param {String} pdir - the project directory (where package.json is)
  * @param {String|Array} names - the package(s) to remove
- * @param {Function} callback(err);
+ * @param {Function} callback(err)
  */
 
 exports.remove = function (pdir, names, callback) {
@@ -125,11 +127,36 @@ exports.remove = function (pdir, names, callback) {
         names = [names];
     }
     jamrc.load(function (err, settings) {
-        var opt = {repositories: settings.repositories};
-
         install.initDir(settings, pdir, opt, function (err, opt, cfg) {
             opt = install.extendOptions(pdir, settings, cfg, opt);
             remove.remove(settings, cfg, opt, names, callback);
+        });
+    });
+};
+
+
+
+
+
+/**
+ * Lists installed packages for the given project. The callback gets the
+ * output that would normally be printed to the terminal and an array of
+ * package objects (representing the values from each package's package.json
+ * file).
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {Function} callback(err, output, packages)
+ */
+
+exports.ls = function (pdir, callback) {
+    jamrc.load(function (err, settings) {
+        var opt = {};
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            var package_dir = path.resolve(pdir, settings.package_dir);
+            if (cfg.jam && cfg.jam.packageDir) {
+                package_dir = path.resolve(pdir, cfg.jam.packageDir);
+            }
+            ls.ls(settings, cfg, package_dir, callback);
         });
     });
 };
