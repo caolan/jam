@@ -2,13 +2,14 @@
  * Public API to Jam features
  */
 
+var jamrc = require('./lib/jamrc'),
+    install = require('./lib/commands/install');
+
 
 // silence logger module
 var logger = require('./lib/logger');
 logger.level = 'none'
 logger.clean_exit = true;
-
-exports.compile = function (cwd, settings, opt, callback) {
 
 
 /**
@@ -34,3 +35,27 @@ exports.compile = function (cwd, settings, opt, callback) {
  */
 
 exports.compile = require('./lib/commands/compile').compile;
+
+
+/**
+ * Install a package using the appropriate settings for the project directory.
+ * Reads values from .jamrc and package.json to install to the correct
+ * directory.
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {String|Array} names - the package(s) to install
+ * @param {Function} callback(err)
+ */
+
+exports.install = function (pdir, names, callback) {
+    if (!Array.isArray(names)) {
+        names = [names];
+    }
+    var opt = {};
+    jamrc.load(function (err, settings) {
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+            install.installPackages(cfg, names, opt, callback);
+        });
+    });
+};
