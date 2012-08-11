@@ -4,13 +4,32 @@
 
 var jamrc = require('./lib/jamrc'),
     install = require('./lib/commands/install'),
-    upgrade = require('./lib/commands/upgrade');
+    upgrade = require('./lib/commands/upgrade'),
+    logger = require('./lib/logger');
 
 
-// silence logger module
-var logger = require('./lib/logger');
-logger.level = 'none'
+// silence logger module by default
+logger.level = 'error';
 logger.clean_exit = true;
+
+
+/**
+ * Set log-level, by default only errors not passed back to api callbacks are
+ * logged. If you'd like more console output, call this function beforehand.
+ *
+ * Levels:
+ *
+ *   error
+ *   warning
+ *   info
+ *   debug
+ *
+ * @param {String} level
+ */
+
+exports.logLevel = function (level) {
+    logger.level = level;
+};
 
 
 /**
