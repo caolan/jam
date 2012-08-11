@@ -3,7 +3,8 @@
  */
 
 var jamrc = require('./lib/jamrc'),
-    install = require('./lib/commands/install');
+    install = require('./lib/commands/install'),
+    upgrade = require('./lib/commands/upgrade');
 
 
 // silence logger module
@@ -51,11 +52,40 @@ exports.install = function (pdir, names, callback) {
     if (!Array.isArray(names)) {
         names = [names];
     }
-    var opt = {};
     jamrc.load(function (err, settings) {
+        var opt = {repositories: settings.repositories};
+
         install.initDir(settings, pdir, opt, function (err, opt, cfg) {
             opt = install.extendOptions(pdir, settings, cfg, opt);
             install.installPackages(cfg, names, opt, callback);
+        });
+    });
+};
+
+
+/**
+ * Upgrades all or specified packages for the provided project. Reads values
+ * from .jamrc and package.json to find the package directory and repositories.
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {String|Array} names - specific package(s) to upgrade (optional)
+ * @param {Function} callback(err)
+ */
+
+exports.upgrade = function (pdir, /*optional*/names, callback) {
+    if (!callback) {
+        callback = names;
+        names = null;
+    }
+    if (names && !Array.isArray(names)) {
+        names = [names];
+    }
+    jamrc.load(function (err, settings) {
+        var opt = {repositories: settings.repositories};
+
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+            upgrade.upgrade(settings, names, opt, cfg, callback);
         });
     });
 };
