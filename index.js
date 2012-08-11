@@ -5,6 +5,7 @@
 var jamrc = require('./lib/jamrc'),
     install = require('./lib/commands/install'),
     upgrade = require('./lib/commands/upgrade'),
+    remove = require('./lib/commands/remove'),
     logger = require('./lib/logger');
 
 
@@ -105,6 +106,30 @@ exports.upgrade = function (pdir, /*optional*/names, callback) {
         install.initDir(settings, pdir, opt, function (err, opt, cfg) {
             opt = install.extendOptions(pdir, settings, cfg, opt);
             upgrade.upgrade(settings, names, opt, cfg, callback);
+        });
+    });
+};
+
+
+/**
+ * Removes specified packages from the project's package directory. Reads values
+ * from .jamrc and package.json to find the package directory.
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {String|Array} names - the package(s) to remove
+ * @param {Function} callback(err);
+ */
+
+exports.remove = function (pdir, names, callback) {
+    if (!Array.isArray(names)) {
+        names = [names];
+    }
+    jamrc.load(function (err, settings) {
+        var opt = {repositories: settings.repositories};
+
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+            remove.remove(settings, cfg, opt, names, callback);
         });
     });
 };
