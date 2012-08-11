@@ -6,8 +6,10 @@ var ls = require('./lib/commands/ls'),
     install = require('./lib/commands/install'),
     upgrade = require('./lib/commands/upgrade'),
     remove = require('./lib/commands/remove'),
+    repository= require('./lib/repository'),
     logger = require('./lib/logger'),
     jamrc = require('./lib/jamrc'),
+    async = require('async'),
     path = require('path');
 
 
@@ -135,9 +137,6 @@ exports.remove = function (pdir, names, callback) {
 };
 
 
-
-
-
 /**
  * Lists installed packages for the given project. The callback gets the
  * output that would normally be printed to the terminal and an array of
@@ -152,11 +151,44 @@ exports.ls = function (pdir, callback) {
     jamrc.load(function (err, settings) {
         var opt = {};
         install.initDir(settings, pdir, opt, function (err, opt, cfg) {
-            var package_dir = path.resolve(pdir, settings.package_dir);
-            if (cfg.jam && cfg.jam.packageDir) {
-                package_dir = path.resolve(pdir, cfg.jam.packageDir);
-            }
-            ls.ls(settings, cfg, package_dir, callback);
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+            ls.ls(settings, cfg, opt.target_dir, callback);
+        });
+    });
+};
+
+
+/**
+ * Searches repositories for a package.
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {String|Array} q - the search terms
+ * @param {Number} limit - limit the number of results per-repository (optional)
+ * @param {Function} callback(err, results)
+ */
+
+exports.search = function (pdir, q, /*optional*/limit, callback) {
+    if (!callback) {
+        callback = limit;
+        limit = 10;
+    }
+    jamrc.load(function (err, settings) {
+        var opt = {repositories: settings.repositories};
+
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+
+            async.concat(opt.repositories, function (repo, cb) {
+                repository.search(repo, q, limit, function (err, data) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, data.rows.map(function (r) {
+                        return r.doc;
+                    }));
+                });
+            },
+            callback);
         });
     });
 };
