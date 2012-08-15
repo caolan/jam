@@ -1,8 +1,8 @@
-var utils = require('../lib/utils'),
+var utils = require('../../lib/utils'),
     path = require('path'),
     fs = require('fs'),
     child_process = require('child_process'),
-    logger = require('../lib/logger');
+    logger = require('../../lib/logger');
 
 logger.clean_exit = true;
 

@@ -1,5 +1,5 @@
-var couchdb = require('../lib/couchdb'),
-    logger = require('../lib/logger');
+var couchdb = require('../../lib/couchdb'),
+    logger = require('../../lib/logger');
 
 logger.clean_exit = true;
 

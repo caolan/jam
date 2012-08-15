@@ -1,4 +1,4 @@
-var tree = require('../lib/tree');
+var tree = require('../../lib/tree');
 
 
 exports['extend - install new - reduce dep version'] = function (test) {
