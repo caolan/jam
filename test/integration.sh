@@ -9,6 +9,7 @@ do
   DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+NODEUNIT="node $DIR/../node_modules/nodeunit/bin/nodeunit"
 
 cd $DIR
-nodeunit integration
+$NODEUNIT integration
