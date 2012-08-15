@@ -1,7 +1,7 @@
-var exec = require('child_process').exec,
-    http = require('http'),
+var http = require('http'),
     couchdb = require('../../lib/couchdb'),
     logger = require('../../lib/logger'),
+    utils = require('../utils'),
     path = require('path');
 
 
@@ -46,12 +46,8 @@ exports.tearDown = function (callback) {
 exports['publish within package directory'] = function (test) {
     test.expect(1);
     process.chdir('./fixtures/package-one');
-    var cmd = BIN + ' publish';
-    exec(cmd, {env: ENV}, function (err, stdout, stderr) {
+    utils.runJam(['publish'], {env: ENV}, function (err, stdout, stderr) {
         if (err) {
-            console.log('Command failed: ' + cmd);
-            console.log(stdout);
-            console.log(stderr);
             return test.done(err);
         }
         couchdb(TESTDB).get('package-one', function (err, doc) {
@@ -63,12 +59,9 @@ exports['publish within package directory'] = function (test) {
 
 exports['publish path outside package directory'] = function (test) {
     test.expect(1);
-    var cmd = BIN + ' publish ./fixtures/package-one';
-    exec(cmd, {env: ENV}, function (err, stdout, stderr) {
+    var args = ['publish', path.resolve('fixtures', 'package-one')];
+    utils.runJam(args, {env: ENV}, function (err, stdout, stderr) {
         if (err) {
-            console.log('Command failed: ' + cmd);
-            console.log(stdout);
-            console.log(stderr);
             return test.done(err);
         }
         couchdb(TESTDB).get('package-one', function (err, doc) {
@@ -80,12 +73,13 @@ exports['publish path outside package directory'] = function (test) {
 
 exports['publish to command-line repo'] = function (test) {
     test.expect(1);
-    var cmd = BIN + ' publish ./fixtures/package-one --repository=' + TESTDB;
-    exec(cmd, function (err, stdout, stderr) {
+    var args = [
+        'publish',
+        path.resolve('fixtures', 'package-one'),
+        '--repository=' + TESTDB
+    ];
+    utils.runJam(args, function (err, stdout, stderr) {
         if (err) {
-            console.log('Command failed: ' + cmd);
-            console.log(stdout);
-            console.log(stderr);
             return test.done(err);
         }
         couchdb(TESTDB).get('package-one', function (err, doc) {

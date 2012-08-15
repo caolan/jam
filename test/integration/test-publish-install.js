@@ -1,7 +1,7 @@
-var exec = require('child_process').exec,
-    couchdb = require('../../lib/couchdb'),
+var couchdb = require('../../lib/couchdb'),
     logger = require('../../lib/logger'),
     env = require('../../lib/env'),
+    utils = require('../utils'),
     rimraf = require('rimraf'),
     async = require('async'),
     http = require('http'),
@@ -68,49 +68,32 @@ exports['empty project'] = {
         test.expect(2);
         process.chdir(this.project_dir);
         var pkgone = path.resolve(__dirname, 'fixtures', 'package-one');
-        async.series([
-            function (cb) {
-                var cmd = BIN + ' publish ' + pkgone;
-                exec(cmd, {env: ENV}, function (err, stdout, stderr) {
-                    if (err) {
-                        console.log('Command failed: ' + cmd);
-                        console.log(stdout);
-                        console.log(stderr);
-                    }
-                    return cb(err);
-                });
-            },
-            function (cb) {
-                var cmd = BIN + ' install package-one';
-                exec(cmd, {env: ENV}, function (err, stdout, stderr) {
-                    if (err) {
-                        console.log('Command failed: ' + cmd);
-                        console.log(stdout);
-                        console.log(stderr);
-                    }
-                    return cb(err);
-                });
-            },
-            function (cb) {
-                // test that main.js was installed from package
-                var a = fs.readFileSync(path.resolve(pkgone, 'main.js'));
-                var b = fs.readFileSync(
-                    path.resolve(this.project_dir, 'jam/package-one/main.js')
-                );
-                test.equal(a.toString(), b.toString());
 
-                // make sure the requirejs config includes the new package
-                var cfg = require(
-                    path.resolve(this.project_dir, 'jam', 'require.config')
-                );
-                test.same(cfg.packages, [{
-                    name: 'package-one',
-                    location: 'jam/package-one'
-                }]);
-                cb();
-            }
+        async.series([
+            async.apply(utils.runJam, ['publish', pkgone], {env: ENV}),
+            async.apply(utils.runJam, ['install', 'package-one'], {env: ENV}),
         ],
-        test.done);
+        function (err) {
+            if (err) {
+                return test.done(err);
+            }
+            // test that main.js was installed from package
+            var a = fs.readFileSync(path.resolve(pkgone, 'main.js'));
+            var b = fs.readFileSync(
+                path.resolve(this.project_dir, 'jam/package-one/main.js')
+            );
+            test.equal(a.toString(), b.toString());
+
+            // make sure the requirejs config includes the new package
+            var cfg = require(
+                path.resolve(this.project_dir, 'jam', 'require.config')
+            );
+            test.same(cfg.packages, [{
+                name: 'package-one',
+                location: 'jam/package-one'
+            }]);
+            test.done();
+        });
     }
 
 };
