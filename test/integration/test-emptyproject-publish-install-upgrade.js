@@ -2,12 +2,11 @@
  * Test description
  * ================
  *
- * Starting with a project using package.json with jam deps defined
- * - jam publish package-one
- * - jam publish package-two (depends on package-one)
- * - jam install, test installation succeeded
- * - jam ls, test packages are listed
- * - jam remove package-two, test it's removed
+ * Starting with an empty project (no package.json)
+ * - jam publish package-one @ 0.0.1
+ * - jam publish package-one @ 0.0.2
+ * - jam install package-one @ 0.0.1, test installation succeeded
+ * - jam upgrade, test package-one is now at 0.0.2
  */
 
 
@@ -65,12 +64,12 @@ exports.tearDown = function (callback) {
 };
 
 
-exports['project with package.json'] = {
+exports['empty project'] = {
 
     setUp: function (callback) {
         this.project_dir = path.resolve(env.temp, 'jamtest-' + Math.random());
         // set current project to empty directory
-        ncp('./fixtures/project-packagejson', this.project_dir, callback);
+        ncp('./fixtures/project-empty', this.project_dir, callback);
     },
 
     tearDown: function (callback) {
@@ -83,16 +82,18 @@ exports['project with package.json'] = {
     },
 
     'publish, install, ls, remove': function (test) {
-        test.expect(6);
+        test.expect(4);
         var that = this;
         process.chdir(that.project_dir);
         var pkgone = path.resolve(__dirname, 'fixtures', 'package-one'),
-            pkgtwo = path.resolve(__dirname, 'fixtures', 'package-two');
+            pkgonev2 = path.resolve(__dirname, 'fixtures', 'package-one-v2');
 
         async.series([
             async.apply(utils.runJam, ['publish', pkgone], {env: ENV}),
-            async.apply(utils.runJam, ['publish', pkgtwo], {env: ENV}),
-            async.apply(utils.runJam, ['install'], {env: ENV}),
+            async.apply(utils.runJam, ['publish', pkgonev2], {env: ENV}),
+            async.apply(
+                utils.runJam, ['install', 'package-one@0.0.1'], {env: ENV}
+            ),
             function (cb) {
                 // test that main.js was installed from package
                 var a = fs.readFileSync(path.resolve(pkgone, 'main.js'));
@@ -100,48 +101,22 @@ exports['project with package.json'] = {
                     path.resolve(that.project_dir, 'jam/package-one/main.js')
                 );
                 test.equal(a.toString(), b.toString());
-                var c = fs.readFileSync(path.resolve(pkgtwo, 'two.js'));
-                var d = fs.readFileSync(
-                    path.resolve(that.project_dir, 'jam/package-two/two.js')
-                );
-                test.equal(c.toString(), d.toString());
 
                 // make sure the requirejs config includes the new package
                 var cfg = utils.freshRequire(
                     path.resolve(that.project_dir, 'jam', 'require.config')
                 );
-                var packages= _.sortBy(cfg.packages, function (p) {
-                    return p.name;
-                });
-                test.same(packages, [
+                test.same(cfg.packages, [
                     {
                         name: 'package-one',
                         location: 'jam/package-one'
-                    },
-                    {
-                        name: 'package-two',
-                        location: 'jam/package-two',
-                        main: 'two.js'
                     }
                 ]);
                 cb();
             },
             function (cb) {
-                utils.runJam(['ls'], function (err, stdout, stderr) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    var lines = stdout.replace(/\n$/, '').split('\n');
-                    test.same(lines.sort(), [
-                        '* package-one \u001b[33m0.0.1\u001b[39m',
-                        '* package-two \u001b[33m0.0.1\u001b[39m'
-                    ]);
-                    cb();
-                });
-            },
-            function (cb) {
-                var args = ['remove', 'package-two'];
-                utils.runJam(args, function (err, stdout, stderr) {
+                var args = ['upgrade'];
+                utils.runJam(args, {env: ENV}, function (err, stdout, stderr) {
                     if (err) {
                         return cb(err);
                     }
@@ -154,11 +129,14 @@ exports['project with package.json'] = {
                             location: 'jam/package-one'
                         }
                     ]);
-                    var p = path.resolve(that.project_dir, 'jam/package-two');
-                    pathExists(p, function (exists) {
-                        test.ok(!exists, 'package-two directory removed');
-                        cb();
-                    });
+                    var p = path.resolve(
+                        that.project_dir,
+                        'jam/package-one/package.json'
+                    );
+                    var content = fs.readFileSync(p);
+                    var pkg = JSON.parse(content.toString());
+                    test.equal(pkg.version, '0.0.2');
+                    cb();
                 });
             }
         ],
