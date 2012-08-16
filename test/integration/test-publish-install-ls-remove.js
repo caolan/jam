@@ -78,7 +78,7 @@ exports['empty project'] = {
         setTimeout(function () {
             // clear current project
             rimraf(that.project_dir, callback);
-        }, 400);
+        }, 1000);
     },
 
     'publish, install, ls, remove': function (test) {
