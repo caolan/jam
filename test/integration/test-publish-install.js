@@ -60,8 +60,11 @@ exports['empty project'] = {
     },
 
     tearDown: function (callback) {
-        // clear current project
-        rimraf(this.project_dir, callback);
+        // timeout to try and wait until dir is no-longer busy on windows
+        setTimeout(function () {
+            // clear current project
+            rimraf(this.project_dir, callback);
+        }, 400);
     },
 
     'publish then install': function (test) {
