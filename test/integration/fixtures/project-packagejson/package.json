@@ -1,0 +1,8 @@
+{
+    "jam": {
+        "dependencies": {
+            "package-one": null,
+            "package-two": null
+        }
+    }
+}

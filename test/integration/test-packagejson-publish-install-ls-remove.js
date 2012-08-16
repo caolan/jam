@@ -2,10 +2,10 @@
  * Test description
  * ================
  *
- * Starting with an empty project (no package.json)
+ * Starting with a project using package.json with jam deps defined
  * - jam publish package-one
  * - jam publish package-two (depends on package-one)
- * - jam install package-two, test installation succeeded
+ * - jam install, test installation succeeded
  * - jam ls, test packages are listed
  * - jam remove package-two, test it's removed
  */
@@ -20,7 +20,8 @@ var couchdb = require('../../lib/couchdb'),
     http = require('http'),
     path = require('path'),
     ncp = require('ncp').ncp,
-    fs = require('fs');
+    fs = require('fs'),
+    _ = require('underscore');
 
 
 var pathExists = fs.exists || path.exists;
@@ -64,12 +65,12 @@ exports.tearDown = function (callback) {
 };
 
 
-exports['empty project'] = {
+exports['project with package.json'] = {
 
     setUp: function (callback) {
         this.project_dir = path.resolve(env.temp, 'jamtest-' + Math.random());
         // set current project to empty directory
-        ncp('./fixtures/project-empty', this.project_dir, callback);
+        ncp('./fixtures/project-packagejson', this.project_dir, callback);
     },
 
     tearDown: function (callback) {
@@ -91,7 +92,7 @@ exports['empty project'] = {
         async.series([
             async.apply(utils.runJam, ['publish', pkgone], {env: ENV}),
             async.apply(utils.runJam, ['publish', pkgtwo], {env: ENV}),
-            async.apply(utils.runJam, ['install', 'package-two'], {env: ENV}),
+            async.apply(utils.runJam, ['install'], {env: ENV}),
             function (cb) {
                 // test that main.js was installed from package
                 var a = fs.readFileSync(path.resolve(pkgone, 'main.js'));
@@ -109,7 +110,10 @@ exports['empty project'] = {
                 var cfg = utils.freshRequire(
                     path.resolve(that.project_dir, 'jam', 'require.config')
                 );
-                test.same(cfg.packages, [
+                var packages= _.sortBy(cfg.packages, function (p) {
+                    return p.name;
+                });
+                test.same(packages, [
                     {
                         name: 'package-one',
                         location: 'jam/package-one'
@@ -128,9 +132,9 @@ exports['empty project'] = {
                         return cb(err);
                     }
                     var lines = stdout.replace(/\n$/, '').split('\n');
-                    test.same(lines, [
-                        '  package-one \u001b[33m0.0.1\u001b[39m',
-                        '  package-two \u001b[33m0.0.1\u001b[39m'
+                    test.same(lines.sort(), [
+                        '* package-one \u001b[33m0.0.1\u001b[39m',
+                        '* package-two \u001b[33m0.0.1\u001b[39m'
                     ]);
                     cb();
                 });
@@ -144,7 +148,7 @@ exports['empty project'] = {
                     var cfg = utils.freshRequire(
                         path.resolve(that.project_dir, 'jam', 'require.config')
                     );
-                    test.same(cfg.packages, [
+                    test.same(cfg.packages.sort(), [
                         {
                             name: 'package-one',
                             location: 'jam/package-one'
