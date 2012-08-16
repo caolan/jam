@@ -1,2 +1,0 @@
-This is used to test jam commands inside a fresh project without an
-existing package.json (either for NPM or for Jam).

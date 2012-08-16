@@ -1,5 +1,6 @@
 var fork = require('child_process').fork,
-    path = require('path');
+    path = require('path'),
+    _ = require('underscore');
 
 
 exports.runJam = function (args, /*optional*/opts, callback) {
@@ -33,4 +34,15 @@ exports.runJam = function (args, /*optional*/opts, callback) {
         callback(null, stdout, stderr);
     });
     jam.disconnect();
+};
+
+
+// Invalidates cached module and re-requires it. Used to load require.config.js.
+exports.freshRequire = function (p) {
+    var cached = Object.keys(require.cache);
+    var resolved = require.resolve(p);
+    if (_.indexOf(cached, resolved) !== -1) {
+        delete require.cache[resolved];
+    }
+    return require(p);
 };
