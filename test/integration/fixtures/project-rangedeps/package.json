@@ -1,0 +1,7 @@
+{
+    "jam": {
+        "dependencies": {
+            "package-two": "<=0.0.2"
+        }
+    }
+}

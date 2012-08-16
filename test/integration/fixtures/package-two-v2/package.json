@@ -1,0 +1,9 @@
+{
+    "name": "package-two",
+    "version": "0.0.2",
+    "description": "Test package two",
+    "dependencies": {
+        "package-one": "0.0.2"
+    },
+    "main": "two.js"
+}
