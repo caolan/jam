@@ -1,0 +1,13 @@
+{
+    "name": "project-custompaths",
+    "version": "1.2.3",
+    "description": "Example project using custom package path and base URL",
+    "jam": {
+        "packageDir": "public/js/vendor",
+        "baseUrl": "public",
+        "dependencies": {
+            "package-one": null,
+            "package-two": null
+        }
+    }
+}
