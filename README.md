@@ -83,8 +83,8 @@ default, but it's possible to create a local, e.g. corporate, repository.
 
 ```javascript
 exports.repositories = [
-    "http://mycorporation.com:5984/repository/"
-  , "http://jamjs.org/repository"
+    "http://mycorporation.com:5984/repository/",
+    "http://jamjs.org/repository"
 ];
 ```
 
@@ -123,17 +123,17 @@ tests (in test/integration). The unit tests are easy to run by running the
 `test/unit.sh` script, or `test\\unit.bat` on Windows. The integration tests
 first require you to set up a CouchDB instance to test against (you can get
 a free account at [IrisCouch](iriscouch.com] if you don't want to install
-CouchDB). You then need to set the JAM_TEST_DB environment variable to
+CouchDB). You then need to set the JAM\_TEST\_DB environment variable to
 point to a CouchDB database URL for testing:
 
 #### Linux
 ```
-export JAM\_TEST\_DB=http://user:password@localhost:5984/jamtest
+export JAM_TEST_DB=http://user:password@localhost:5984/jamtest
 ```
 
 #### Windows
 ```
-set JAM\_TEST\_DB=http://user:password@localhost:5984/jamtest
+set JAM_TEST_DB=http://user:password@localhost:5984/jamtest
 ```
 
 **Warning:** All data in the test database will be deleted!
