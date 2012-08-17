@@ -39,6 +39,30 @@ Unlike other repositories, we put the **browser** first.
 [Learn more...](http://jamjs.org)
 
 
+## Browser packages in package.json
+
+You can also define your browser dependencies in a project-level package.json
+file. If you use Node.js, this format will already familiar to you, and the
+Jam dependencies can live alongside your NPM dependencies. It's also possible
+to define custom install paths and baseUrls here:
+
+```javascript
+{
+    "name": "my-project",
+    "version": "0.0.1",
+    "description": "My example project",
+    "jam": {
+        "baseUrl": "public",
+        "packageDir": "public/vendor",
+        "dependencies": {
+            "jquery": "1.7.x",
+            "underscore": null
+        }
+    }
+}
+```
+
+
 ## Installation
 
     # npm install -g jamjs
@@ -48,23 +72,82 @@ Requires [node.js](http://nodejs.org)
 
 ## Settings
 
-To customize Jam setting create `.jamrc` file in your home directory.
+You can customize Jam by creating a `.jamrc` file in your home directory.
 
-Edit `/lib/jamrc.js` to change paths to `.jamrc` file and it's name.
+### .jamrc
 
-## .jamrc
+#### repositories
 
-###repositories
-
-An array with npm repositiories. Jam uses `http://jamjs.org/repository` by default, but it's possible to create a local, e.g. corporate, repository.
+An array with Jam repositiories. Jam uses `http://jamjs.org/repository` by
+default, but it's possible to create a local, e.g. corporate, repository.
 
 ```exports.repositories = [
     "http://mycorporation.com:5984/repository/"
   , "http://jamjs.org/repository"
-];```
+];
+```
 
-###package_dir
+Repositories are in preference-order, so packages from repositories earlier
+in the list will be preferred over packages in repositories later in the
+list. However, when no package version is specified, the highest version
+number will be installed (even if that's not from the earliest repository).
 
-Output Jam directory (defaults to `./jam`).
+You can add custom search URLs to repositories too:
+
+```javascript
+exports.repositories = [
+    {
+        url: "http://mycorporation.com:5984/repository/",
+        search: "http://db.com:5984/_fti/key/_design/search/something"
+    },
+    "http://jamjs.org/repository"
+];
+```
+
+### package\_dir
+
+Sets the default package installation directory (normally uses `./jam`). This
+is best customized in your project-level package.json file, to ensure other
+developers also install to the correct location.
 
 ```exports.package_dir = 'libs';```
+
+
+## Running the tests
+
+Jam includes two test suites, unit tests (in test/unit) and integration
+tests (in test/integration). The unit tests are easy to run by running the
+`test/unit.sh` script, or `test\\unit.bat` on Windows. The integration tests
+first require you to set up a CouchDB instance to test against (you can get
+a free account at [IrisCouch](iriscouch.com] if you don't want to install
+CouchDB). You then need to set the JAM_TEST_DB environment variable to
+point to a CouchDB database URL for testing:
+
+#### Linux
+```
+export JAM\_TEST\_DB=http://user:password@localhost:5984/jamtest
+```
+
+#### Windows
+```
+set JAM\_TEST\_DB=http://user:password@localhost:5984/jamtest
+```
+
+**Warning:** All data in the test database will be deleted!
+
+You can then run the integration tests using `test/integration.sh' or
+'test\\integration.bat`. To run BOTH the unit and integration tests use
+'test/all.sh' or `test\\all.bat`.
+
+
+## More documentation
+
+To learn how to create and publish packages etc, and for more info on using
+packages, consult the [Jam documentation website](http://jamjs.org/docs).
+
+
+## Links
+
+* [Homepage](http://jamjs.org)
+* [Packages](http://jamjs.org/packages/)
+* [Docs](http://jamjs.org/doc)
