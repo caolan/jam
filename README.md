@@ -81,7 +81,8 @@ You can customize Jam by creating a `.jamrc` file in your home directory.
 An array with Jam repositiories. Jam uses `http://jamjs.org/repository` by
 default, but it's possible to create a local, e.g. corporate, repository.
 
-```exports.repositories = [
+```javascript
+exports.repositories = [
     "http://mycorporation.com:5984/repository/"
   , "http://jamjs.org/repository"
 ];
@@ -110,7 +111,9 @@ Sets the default package installation directory (normally uses `./jam`). This
 is best customized in your project-level package.json file, to ensure other
 developers also install to the correct location.
 
-```exports.package_dir = 'libs';```
+```javascript
+exports.package_dir = 'libs';
+```
 
 
 ## Running the tests
