@@ -48,7 +48,7 @@ Requires [node.js](http://nodejs.org)
 
 ## Settings
 
-To customize Jam setting create `.jamrc` file in your home directory.
+To customize Jam settings create `.jamrc` file in your home directory.
 
 Edit `/lib/jamrc.js` to change paths to `.jamrc` file and it's name.
 
@@ -58,13 +58,25 @@ Edit `/lib/jamrc.js` to change paths to `.jamrc` file and it's name.
 
 An array with npm repositiories. Jam uses `http://jamjs.org/repository` by default, but it's possible to create a local, e.g. corporate, repository.
 
-```exports.repositories = [
+```
+exports.repositories = [
     "http://mycorporation.com:5984/repository/"
   , "http://jamjs.org/repository"
-];```
+];
+```
 
 ###package_dir
 
 Output Jam directory (defaults to `./jam`).
 
 ```exports.package_dir = 'libs';```
+
+###search_urls
+
+Custom search URLs for repositories.
+
+```
+exports.search_urls = {
+    "http://mycorporation.com:5984/repository/": "http://db.com:5984/_fti/key/_design/search/something"
+};
+```
