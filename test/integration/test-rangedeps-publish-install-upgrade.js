@@ -108,10 +108,10 @@ exports['project with ranged dependencies in package.json'] = {
                 var cfg = utils.freshRequire(
                     path.resolve(that.project_dir, 'jam', 'require.config')
                 );
-                var packages= _.sortBy(cfg.packages, function (p) {
+                var packages = _.sortBy(cfg.packages, function (p) {
                     return p.name;
                 });
-                test.same(cfg.packages, [
+                test.same(packages, [
                     {
                         name: 'package-one',
                         location: 'jam/package-one'
