@@ -81,7 +81,7 @@ exports['empty project'] = {
         }, 1000);
     },
 
-    'publish, install, ls, remove': function (test) {
+    'publish, install, upgrade': function (test) {
         test.expect(4);
         var that = this;
         process.chdir(that.project_dir);
