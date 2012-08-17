@@ -5,6 +5,7 @@
 var ls = require('./lib/commands/ls'),
     install = require('./lib/commands/install'),
     upgrade = require('./lib/commands/upgrade'),
+    rebuild = require('./lib/commands/rebuild'),
     remove = require('./lib/commands/remove'),
     repository= require('./lib/repository'),
     logger = require('./lib/logger'),
@@ -189,6 +190,25 @@ exports.search = function (pdir, q, /*optional*/limit, callback) {
                 });
             },
             callback);
+        });
+    });
+};
+
+
+/**
+ * Rebuild require.config.js and require.js according to the packages
+ * available inside the package directory.
+ *
+ * @param {String} pdir - the project directory (where package.json is)
+ * @param {Function} callback(err)
+ */
+
+exports.rebuild = function (pdir, callback) {
+    jamrc.load(function (err, settings) {
+        var opt = {};
+        install.initDir(settings, pdir, opt, function (err, opt, cfg) {
+            opt = install.extendOptions(pdir, settings, cfg, opt);
+            rebuild.rebuild(settings, cfg, opt, callback);
         });
     });
 };
