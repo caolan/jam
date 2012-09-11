@@ -15,7 +15,6 @@ var couchdb = require('../../lib/couchdb'),
     logger = require('../../lib/logger'),
     env = require('../../lib/env'),
     utils = require('../utils'),
-    rimraf = require('rimraf'),
     async = require('async'),
     http = require('http'),
     path = require('path'),
@@ -82,10 +81,7 @@ exports['empty project'] = {
     tearDown: function (callback) {
         var that = this;
         // timeout to try and wait until dir is no-longer busy on windows
-        setTimeout(function () {
-            // clear current project
-            rimraf(that.project_dir, callback);
-        }, 1000);
+        utils.myrimraf(that.project_dir, callback);
     },
 
     'link': function (test) {

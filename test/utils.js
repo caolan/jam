@@ -1,4 +1,5 @@
 var fork = require('child_process').fork,
+    rimraf = require('rimraf'),
     path = require('path'),
     _ = require('underscore');
 
@@ -45,4 +46,19 @@ exports.freshRequire = function (p) {
         delete require.cache[resolved];
     }
     return require(p);
+};
+
+exports.myrimraf = function (p, callback, tries) {
+    tries = tries || 50;
+    rimraf(p, function (err) {
+        if (err && err.code === 'EMBUSY') {
+            if (tries) {
+                setTimeout(function () {
+                    exports.myrimraf(p, callback, tries - 1);
+                }, 100);
+                return;
+            }
+        }
+        return callback.apply(this, arguments);
+    });
 };
