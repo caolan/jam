@@ -72,11 +72,13 @@ exports['empty project'] = {
         ncp('./fixtures/project-empty', this.project_dir, callback);
     },
 
+    /*
     tearDown: function (callback) {
         var that = this;
         // timeout to try and wait until dir is no-longer busy on windows
-        utils.myrimraf(that.project_dir, callback);
+        //utils.myrimraf(that.project_dir, callback);
     },
+    */
 
     'publish, install, ls, remove': function (test) {
         test.expect(6);

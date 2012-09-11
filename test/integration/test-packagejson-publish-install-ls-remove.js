@@ -72,11 +72,13 @@ exports['project with package.json'] = {
         ncp('./fixtures/project-packagejson', this.project_dir, callback);
     },
 
+    /*
     tearDown: function (callback) {
         var that = this;
         // clear current project
-        utils.myrimraf(that.project_dir, callback);
+        //utils.myrimraf(that.project_dir, callback);
     },
+    */
 
     'publish, install, ls, remove': function (test) {
         test.expect(6);
