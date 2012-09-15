@@ -130,6 +130,7 @@ exports.remove = function (pdir, names, callback) {
         names = [names];
     }
     jamrc.load(function (err, settings) {
+        var opt = {};
         install.initDir(settings, pdir, opt, function (err, opt, cfg) {
             opt = install.extendOptions(pdir, settings, cfg, opt);
             remove.remove(settings, cfg, opt, names, callback);
