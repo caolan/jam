@@ -105,6 +105,21 @@ exports.repositories = [
 ];
 ```
 
+If your local repository doesn't implement full text search (e.g. you don't want
+to install couchdb lucene), you can disable searching functionality for that repository, otherwise
+`jam search` would report an error:
+
+```javascript
+exports.repositories = [
+    {
+        url: "http://mycorporation.com:5984/repository/",
+        search: false
+    },
+    "http://jamjs.org/repository"
+];
+```
+
+
 ### package\_dir
 
 Sets the default package installation directory (normally uses `./jam`). This
