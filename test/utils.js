@@ -22,7 +22,7 @@ exports.runJam = function (args, /*optional*/opts, callback) {
         stderr += data.toString();
     });
     jam.on('exit', function (code) {
-        if (code !== 0) {
+        if (code !== 0 && !opts.expect_error) {
             console.log(['Jam command failed', args]);
             console.log(stdout);
             console.log(stderr);

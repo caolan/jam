@@ -92,17 +92,27 @@ exports['publish to command-line repo'] = function (test) {
 exports['publish with invalid .js package name'] = function (test) {
     test.expect(1);
     process.chdir('./fixtures/package-three-invalid-extjs');
-    utils.runJam(['publish'], {env: ENV}, function (err, stdout, stderr) {
-        test.ok(err);
-        test.done();
-    });
+    utils.runJam(['publish'], {env: ENV, expect_error: true},
+        function (err, stdout, stderr) {
+            if (err) {
+                return test.done(err);
+            }
+            test.ok(/Invalid name property/.test(stderr));
+            test.done();
+        }
+    );
 };
 
 exports['publish with invalid package name characters'] = function (test) {
     test.expect(1);
     process.chdir('./fixtures/package-three-invalid-characters');
-    utils.runJam(['publish'], {env: ENV}, function (err, stdout, stderr) {
-        test.ok(err);
-        test.done();
-    });
+    utils.runJam(['publish'], {env: ENV, expect_error: true},
+        function (err, stdout, stderr) {
+            if (err) {
+                return test.done(err);
+            }
+            test.ok(/Invalid name property/.test(stderr));
+            test.done();
+        }
+    );
 };
