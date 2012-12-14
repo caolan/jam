@@ -44,7 +44,8 @@ Unlike other repositories, we put the **browser** first.
 You can also define your browser dependencies in a project-level package.json
 file. If you use Node.js, this format will already familiar to you, and the
 Jam dependencies can live alongside your NPM dependencies. It's also possible
-to define custom install paths and baseUrls here:
+to define custom install paths and baseUrls, as well as hand in any requirejs
+configuration here:
 
 ```javascript
 {
@@ -57,6 +58,11 @@ to define custom install paths and baseUrls here:
         "dependencies": {
             "jquery": "1.7.x",
             "underscore": null
+        },
+        "config": {
+          "paths": {
+            "templates": "public/templates"
+          }
         }
     }
 }
