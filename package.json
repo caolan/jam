@@ -34,5 +34,8 @@
     "bugs": {"url": "http://github.com/caolan/jam/issues"},
     "bin": {
         "jam": "./bin/jam.js"
+    },
+    "scripts": {
+        "test": "test/all.sh"
     }
 }
