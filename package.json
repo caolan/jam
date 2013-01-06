@@ -1,6 +1,6 @@
 {
     "name": "jamjs",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "description": "",
     "maintainers": [
         {"name": "Caolan McMahon", "web": "https://github.com/caolan"}
@@ -21,7 +21,7 @@
         "minimatch": "~0.2.5",
         "request": "~2.9.202",
         "almond": "0.1.1",
-        "requirejs": "2.0.6"
+        "requirejs": "2.1.2"
     },
     "devDependencies": {
         "nodeunit": "0.7.4"
