@@ -185,10 +185,24 @@ apt-get install couchdb
 ```
 2.  Configure your database
 
+```
+curl -X POST http://127.0.0.1:5984/_replicate -d '{
+    "source":"http://jamjs.org/repository",
+    "target":"http://localhost:5984/repository",
+    "continuous":true,
+    "doc_ids":["_design/jam-packages"]
+    }' -H "Content-Type: application/json"
+```
+
 #### To create a mirror:
 
 ```
-curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"http://jamjs.org/repository", "target":"repository", "continuous":true, "create_target":true}' -H "Content-Type: application/json"
+curl -X POST http://127.0.0.1:5984/_replicate -d '{
+    "source":"http://jamjs.org/repository",
+    "target":"repository",
+    "continuous":true,
+    "create_target":true
+    }' -H "Content-Type: application/json"
 ```
 
 #### To create an empty, private repository:
@@ -217,7 +231,10 @@ exports.repositories = [
     
 ```
 exports.repositories = [
-    "http://localhost:5984/repository",
+    {
+        url: "http://localhost:5984/repository",
+        search: "http://localhost:5984/_fti/local/repository/_design/jam-packages/packages/"
+    },
     "http://jamjs.org/repository"
 ];
 ```
