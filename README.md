@@ -168,26 +168,37 @@ You can then run the integration tests using `test/integration.sh` or
 
 ## Running your own private repository or mirror
 1.  Install couchdb
+    
     #### Mac OS X:
+    
     1. Install [Homebrew](http://mxcl.github.com/homebrew/).
     2. 
+    
 ```
 brew install couchdb
 ```
+    
     #### Ubuntu:
+    
 ```
 apt-get install couchdb
 ```
 2.  Configure your database
+    
     #### To create a mirror:
+    
 ```
 curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"http://jamjs.org/repository", "target":"repository", "continuous":true, "create_target":true}' -H "Content-Type: application/json"
 ```
+    
     #### To create an empty, private repository:
+    
 ```
 curl -X PUT http://127.0.0.1:5984/repository
 ```
+
 3.  Edit your ```.jamrc``` file to use your new repository:
+    
 ```
 exports.repositories = [
     {
@@ -202,7 +213,8 @@ exports.repositories = [
 
 1.  [Install couchdb-lucene](https://github.com/rnewson/couchdb-lucene#build-and-run-couchdb-lucene)
 2.  Restart couchdb.
-3.  Edit your ```.jamrc``` file to allow searching on your repository:    
+3.  Edit your ```.jamrc``` file to allow searching on your repository:
+    
 ```
 exports.repositories = [
     "http://localhost:5984/repository",
