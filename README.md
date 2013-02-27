@@ -125,6 +125,8 @@ exports.repositories = [
 ];
 ```
 
+See the section below on running your own repository.
+
 
 ### package\_dir
 
@@ -163,6 +165,85 @@ You can then run the integration tests using `test/integration.sh` or
 `test\integration.bat`. To run BOTH the unit and integration tests use
 `test/all.sh` or `test\all.bat`.
 
+
+## Running your own private repository or mirror
+1.  Install couchdb
+
+#### Mac OS X:
+
+    1. Install [Homebrew](http://mxcl.github.com/homebrew/).
+    2. 
+
+```
+brew install couchdb
+```
+    
+#### Ubuntu:
+
+```
+apt-get install couchdb
+```
+2.  Configure your database
+
+```
+curl -X POST http://127.0.0.1:5984/_replicate -d '{
+    "source":"http://jamjs.org/repository",
+    "target":"http://localhost:5984/repository",
+    "continuous":true,
+    "doc_ids":["_design/jam-packages"]
+    }' -H "Content-Type: application/json"
+```
+
+#### To create a mirror:
+
+```
+curl -X POST http://127.0.0.1:5984/_replicate -d '{
+    "source":"http://jamjs.org/repository",
+    "target":"repository",
+    "continuous":true,
+    "create_target":true
+    }' -H "Content-Type: application/json"
+```
+
+#### To create an empty, private repository:
+
+```
+curl -X PUT http://127.0.0.1:5984/repository
+```
+
+3.  Edit your ```.jamrc``` file to use your new repository:
+
+```
+exports.repositories = [
+    {
+        url: "http://localhost:5984/repository",
+        search: false
+    },
+    "http://jamjs.org/repository"
+];
+```
+
+### Adding search
+
+1.  [Install couchdb-lucene](https://github.com/rnewson/couchdb-lucene#build-and-run-couchdb-lucene)
+2.  Restart couchdb.
+3.  Edit your ```.jamrc``` file to allow searching on your repository:
+    
+```
+exports.repositories = [
+    {
+        url: "http://localhost:5984/repository",
+        search: "http://localhost:5984/_fti/local/repository/_design/jam-packages/packages/"
+    },
+    "http://jamjs.org/repository"
+];
+```
+
+### Publishing packages to your private repository
+
+```
+jam publish --repository http://localhost:5984/repository
+```
 
 ## More documentation
 
