@@ -145,7 +145,7 @@ Jam includes two test suites, unit tests (in `test/unit`) and integration
 tests (in `test/integration`). The unit tests are easy to run by running the
 `test/unit.sh` script, or `test\unit.bat` on Windows. The integration tests
 first require you to set up a CouchDB instance to test against (you can get
-a free account at [IrisCouch](iriscouch.com] if you don't want to install
+a free account at [IrisCouch](http://www.iriscouch.com/) if you don't want to install
 CouchDB). You then need to set the JAM\_TEST\_DB environment variable to
 point to a CouchDB database URL for testing:
 
