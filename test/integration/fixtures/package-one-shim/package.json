@@ -1,0 +1,10 @@
+{
+    "name": "package-one",
+    "version": "0.0.1",
+    "description": "Test package one shim",
+    "jam": {
+        "shim": {
+            "exports": "PackageOne"
+        }
+    }
+}
