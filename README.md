@@ -68,6 +68,33 @@ configuration here:
 }
 ```
 
+### Git URLs as Dependencies
+
+Git urls can be of the form:
+
++ git://github.com/user/project.git#commit-ish
++ git+ssh://user@hostname:project.git#commit-ish
++ git+ssh://user@hostname/project.git#commit-ish
++ git+http://user@hostname/project/blah.git#commit-ish
++ git+https://user@hostname/project/blah.git#commit-ish
+
+The commit-ish can be any tag, sha, or branch which can be supplied as an argument to git checkout. The default is master.
+
+```javascript
+{
+    "name": "my-project",
+    "version": "0.0.1",
+    "description": "My example project",
+    "jam": {
+        "baseUrl": "public",
+        "packageDir": "public/vendor",
+        "dependencies": {
+            "feature": "git://github.com/user/project.git#0.2.3"
+        }
+    }
+}
+```
+
 
 ## Installation
 

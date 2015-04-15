@@ -32,7 +32,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
             }
         },
         source: 'local'
-    }
+    };
     var sources = [];
     tree.extend(bar, sources, packages, function (err, packages) {
         test.same(packages, {
