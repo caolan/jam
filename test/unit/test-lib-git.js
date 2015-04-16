@@ -7,29 +7,28 @@ var sinon = require('sinon'),
     chance = require('chance')(),
     _ = require('underscore'),
     logger = require('../../lib/logger'),
+    git,
     mkdirp, rimraf, mkdirpCache, rimrafCache;
-
-
-// stub mkdirp before it will be loaded by dm
-require("mkdirp");
-mkdirpCache = path.resolve("../node_modules/mkdirp/index.js");
-rimrafCache = path.resolve("../node_modules/rimraf/rimraf.js");
-
-mkdirp = require.cache[mkdirpCache].exports = sinon.spy(function(path, callback) {
-    callback(null);
-});
-
-rimraf = require.cache[rimrafCache].exports = sinon.spy(function(path, callback) {
-    console.log("RIMRAF CALL");
-    callback(null);
-});
-
-var git = require('../../lib/git');
 
 logger.clean_exit = true;
 
+// stub function modules before they will be loaded by dm
+require("mkdirp");
+require("rimraf");
+mkdirpCache = path.resolve("../node_modules/mkdirp/index.js");
+rimrafCache = path.resolve("../node_modules/rimraf/rimraf.js");
+mkdirp = require.cache[mkdirpCache].exports = sinon.spy(function(path, callback) {
+    callback(null);
+});
+rimraf = require.cache[rimrafCache].exports = sinon.spy(function(path, callback) {
+    callback(null);
+});
 
-exports['get - should call git clone, if there no cache'] = function (test) {
+// now require git
+git = require('../../lib/git');
+
+
+exports['get - should call git clone, if there no cached remote'] = function (test) {
     var uri, exec, stat;
 
     uri = chance.word();
@@ -61,7 +60,7 @@ exports['get - should call git clone, if there no cache'] = function (test) {
 };
 
 
-exports['get - should not call git clone, if there cache'] = function (test) {
+exports['get - should not call git clone, if there cached remote'] = function (test) {
     var uri, exec, stat;
 
     uri = chance.word();
@@ -296,8 +295,8 @@ exports['repository.snapshot - should copy version in temp folder'] = function (
 
 
 exports['cleanup - should rimraf all temp folders'] = function (test) {
-    git.temp = _.range(chance.integer({min: 1, max: 7}), function() {
-        return git.TMP_DIR + "/" + chance.word();
+    git.temp = _.map(_.range(chance.integer({min: 1, max: 7})), function() {
+        return "/dev/null/" + chance.word();
     });
 
     git.cleanup(function(err) {
