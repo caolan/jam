@@ -60,13 +60,13 @@ exports['get - should call git clone, if there no cached remote'] = function (te
 };
 
 
-exports['get - should not call git clone, if there cached remote'] = function (test) {
+exports['get - should not call git clone, but fetch, if there cached remote'] = function (test) {
     var uri, exec, stat;
 
     uri = chance.word();
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
-        callback("This must not be called");
+        callback(null);
     });
 
     stat = sinon.stub(fs, "stat", function(path, callback) {
@@ -77,7 +77,9 @@ exports['get - should not call git clone, if there cached remote'] = function (t
     git.get(uri, function(err, repository) {
         test.ok(!err);
         test.ok(repository instanceof git.Repository);
-        test.equals(exec.callCount, 0);
+
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], "git fetch");
 
         test.equals(stat.callCount, 1);
         test.equals(stat.firstCall.args[0], repository.path);
@@ -214,6 +216,30 @@ exports['repository.checkout - should call git checkout'] = function (test) {
 };
 
 
+exports['repository.fetch - should call git fetch'] = function (test) {
+    var repository, path, exec;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    repository.fetch(function(err) {
+        test.ok(!err);
+
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], 'git fetch');
+        test.same(exec.firstCall.args[1], { cwd: path });
+
+        exec.restore();
+
+        test.done();
+    });
+};
+
+
 exports['repository.includes - should search in logs and refs given value'] = function (test) {
     var repository, path, ref, log,
         refValue, logValue;
@@ -254,13 +280,17 @@ exports['repository.includes - should search in logs and refs given value'] = fu
 };
 
 
-exports['repository.snapshot - should copy version in temp folder'] = function (test) {
-    var repository, path, checkout, cp, commit;
+exports['repository.snapshot - should fetch, checkout and then copy snapshot in a temp folder'] = function (test) {
+    var repository, path, fetch, checkout, cp, commit;
 
     path = chance.word();
     repository = new git.Repository(path);
 
     commit = chance.word();
+
+    fetch = sinon.stub(repository, "fetch", function(callback) {
+        callback(null);
+    });
 
     checkout = sinon.stub(repository, "checkout", function(commitish, callback) {
         callback(null);
@@ -275,8 +305,12 @@ exports['repository.snapshot - should copy version in temp folder'] = function (
 
         test.ok(!err);
 
+        test.equals(fetch.callCount, 1);
+
         test.equals(checkout.callCount, 1);
         test.equals(checkout.firstCall.args[0], commit);
+
+        test.ok(fetch.calledBefore(checkout));
 
         test.equals(mkdirp.callCount, 1);
         test.ok(_.isString(mkdirp.firstCall.args[0]));
@@ -287,7 +321,11 @@ exports['repository.snapshot - should copy version in temp folder'] = function (
         test.equals(cp.firstCall.args[0], path);
         test.equals(cp.firstCall.args[1], makePath);
 
+        test.ok(mkdirp.calledBefore(cp));
+
         test.ok(_.contains(git.temp, makePath));
+
+        test.equals(makePath, filepath);
 
         test.done();
     });
