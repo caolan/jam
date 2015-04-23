@@ -3,6 +3,7 @@ var sinon = require('sinon'),
     fs = require('fs'),
     path = require('path'),
     ncp = require('ncp'),
+    url = require('url'),
     async = require('async'),
     chance = require('chance')(),
     _ = require('underscore'),
@@ -28,10 +29,27 @@ rimraf = require.cache[rimrafCache].exports = sinon.spy(function(path, callback)
 git = require('../../lib/git');
 
 
+exports['get - should throw error when uri is not valid'] = function (test) {
+    var uri;
+
+    uri = chance.word();
+
+    git.get(uri, function(err) {
+        test.ok(err);
+        test.equals(err.message, "Git URI is not valid");
+
+        test.done();
+    });
+};
+
 exports['get - should call git clone, if there no cached remote'] = function (test) {
     var uri, exec, stat;
 
-    uri = chance.word();
+    uri = url.format({
+        host:"mail.ru",
+        protocol: "http:",
+        pathname: "/" + chance.word()
+    });
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
         callback(null);
@@ -60,10 +78,41 @@ exports['get - should call git clone, if there no cached remote'] = function (te
 };
 
 
+exports['get - should call git clone without schema, if it ssh'] = function (test) {
+    var uri, expectedURI, exec, stat;
+
+    uri = "ssh://git@mail.ru:jam.git";
+    expectedURI = uri.replace("ssh://", "");
+
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    stat = sinon.stub(fs, "stat", function(path, callback) {
+        // simulate that directory not exists
+        callback({code: "ENOENT"});
+    });
+
+    git.get(uri, function(err, repository) {
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], "git clone " + expectedURI + " " + repository.path);
+
+        stat.restore();
+        exec.restore();
+
+        test.done();
+    });
+};
+
+
 exports['get - should not call git clone, but fetch, if there cached remote'] = function (test) {
     var uri, exec, stat;
 
-    uri = chance.word();
+    uri = url.format({
+        host:"mail.ru",
+        protocol: "http:",
+        pathname: "/" + chance.word()
+    });
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
         callback(null);
@@ -240,6 +289,60 @@ exports['repository.fetch - should call git fetch'] = function (test) {
 };
 
 
+exports['repository.pull - should call git pull'] = function (test) {
+    var repository, path, exec;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    repository.pull(function(err) {
+        test.ok(!err);
+
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], 'git pull');
+        test.same(exec.firstCall.args[1], { cwd: path });
+
+        exec.restore();
+
+        test.done();
+    });
+};
+
+
+exports['repository.switchTo - should checkout&pull'] = function (test) {
+    var repository, path, checkout, pull, commitish;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    checkout = sinon.stub(repository, "checkout", function(commitish, callback) {
+        callback(null);
+    });
+
+    pull = sinon.stub(repository, "pull", function(callback) {
+        callback(null);
+    });
+
+    commitish = chance.word();
+
+    repository.switchTo(commitish, function(err) {
+        test.ok(!err);
+
+        test.equals(checkout.callCount, 1);
+        test.equals(checkout.firstCall.args[0], commitish);
+
+        test.equals(pull.callCount, 1);
+
+        test.ok(checkout.calledBefore(pull));
+
+        test.done();
+    });
+};
+
 exports['repository.includes - should search in logs and refs given value'] = function (test) {
     var repository, path, ref, log,
         refValue, logValue;
@@ -280,19 +383,15 @@ exports['repository.includes - should search in logs and refs given value'] = fu
 };
 
 
-exports['repository.snapshot - should fetch, checkout and then copy snapshot in a temp folder'] = function (test) {
-    var repository, path, fetch, checkout, cp, commit;
+exports['repository.snapshot - should switch to commitish and then copy snapshot in a temp folder'] = function (test) {
+    var repository, path, switchTo, cp, commit;
 
     path = chance.word();
     repository = new git.Repository(path);
 
     commit = chance.word();
 
-    fetch = sinon.stub(repository, "fetch", function(callback) {
-        callback(null);
-    });
-
-    checkout = sinon.stub(repository, "checkout", function(commitish, callback) {
+    switchTo = sinon.stub(repository, "switchTo", function(commitish, callback) {
         callback(null);
     });
 
@@ -305,12 +404,8 @@ exports['repository.snapshot - should fetch, checkout and then copy snapshot in 
 
         test.ok(!err);
 
-        test.equals(fetch.callCount, 1);
-
-        test.equals(checkout.callCount, 1);
-        test.equals(checkout.firstCall.args[0], commit);
-
-        test.ok(fetch.calledBefore(checkout));
+        test.equals(switchTo.callCount, 1);
+        test.equals(switchTo.firstCall.args[0], commit);
 
         test.equals(mkdirp.callCount, 1);
         test.ok(_.isString(mkdirp.firstCall.args[0]));
