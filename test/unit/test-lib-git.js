@@ -251,7 +251,7 @@ exports['repository.checkout - should call git checkout'] = function (test) {
         callback(null);
     });
 
-    repository.checkout(commit, function(err, refs) {
+    repository.checkout(commit, function(err) {
         test.ok(!err);
 
         test.equals(exec.callCount, 1);
@@ -262,6 +262,36 @@ exports['repository.checkout - should call git checkout'] = function (test) {
 
         test.done();
     });
+};
+
+
+exports['repository.checkout - should call git checkout once'] = function (test) {
+    var repository, path, commit, exec;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    commit = chance.word();
+
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    async.series(
+        [
+            async.apply(repository.checkout.bind(repository), commit),
+            async.apply(repository.checkout.bind(repository), commit)
+        ],
+        function(err) {
+            test.ok(!err);
+
+            test.equals(exec.callCount, 1);
+
+            exec.restore();
+
+            test.done();
+        }
+    );
 };
 
 
