@@ -162,7 +162,7 @@ exports['repository.log - should call git log and return normalized results'] = 
 
         test.equals(exec.callCount, 1);
         test.equals(exec.firstCall.args[0], 'git log --format="%H"');
-        test.same(exec.firstCall.args[1], { cwd: path });
+        test.same(exec.firstCall.args[1], { cwd: path, maxBuffer: 1024 * 1024 * 5 });
 
         test.equals(log.length, gitLogCount);
         log.forEach(function(entry, index) {
@@ -224,7 +224,7 @@ exports['repository.ref - should call git show-refs and return normalized result
 
         test.equals(exec.callCount, 1);
         test.equals(exec.firstCall.args[0], 'git show-ref');
-        test.same(exec.firstCall.args[1], { cwd: path });
+        test.same(exec.firstCall.args[1], { cwd: path, maxBuffer: 1024 * 1024 * 5 });
 
         test.equals(refs.length, gitRefsCount);
 
