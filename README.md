@@ -155,7 +155,7 @@ exports.repositories = [
 See the section below on running your own repository.
 
 
-### package\_dir
+#### package_dir
 
 Sets the default package installation directory (normally uses `./jam`). This
 is best customized in your project-level package.json file, to ensure other
@@ -165,6 +165,14 @@ developers also install to the correct location.
 exports.package_dir = 'libs';
 ```
 
+#### strict
+
+Puts jam into strict mode. In this mode, during installation, subpackages versions checked to be strict.
+If not - the must be hoisted to the root package with strict version declaration.
+
+#### production
+
+Puts jam into production mode. In this mode, during installation, dependencies sources are restricted to be repository.
 
 ## Running the tests
 
