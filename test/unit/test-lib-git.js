@@ -161,7 +161,7 @@ exports['repository.log - should call git log and return normalized results'] = 
         test.ok(_.isArray(log));
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], 'git log --format="%H"');
+        test.equals(exec.firstCall.args[0], 'git rev-list --full-history --all');
         test.same(exec.firstCall.args[1], { cwd: path, maxBuffer: 1024 * 1024 * 5 });
 
         test.equals(log.length, gitLogCount);
