@@ -14,6 +14,11 @@ for (var i = 0; i < args.length; i += 1) {
         args.splice(i, 1);
         logger.level = 'debug';
     }
+
+    if (args[i] === '--verbose') {
+        args.splice(i, 1);
+        logger.level = 'verbose';
+    }
 }
 
 jamrc.load(function (err, settings) {

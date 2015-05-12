@@ -29,6 +29,7 @@ logger.clean_exit = true;
  *   warning
  *   info
  *   debug
+ *   verbose
  *
  * @param {String} level
  */
