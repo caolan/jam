@@ -284,13 +284,13 @@ exports['repository.checkout - should call git checkout local'] = function (test
     hash = require("crypto").randomBytes(20).toString('hex');
 
     async.parallel(
-        ["COMMIT", "TAG", "HEAD"].map(function(type) {
+        [ git.Commitish.COMMIT, git.Commitish.TAG, git.Commitish.HEAD ].map(function(type) {
             return function(next) {
                 var commitish;
 
-                commitish = type == "COMMIT"
+                commitish = type == git.Commitish.COMMIT
                     ? new git.Commitish(hash)
-                    : new git.Commitish(hash, git.Commitish[type], commit);
+                    : new git.Commitish(hash, type, commit);
 
                 repository.checkout(commitish, next);
             }
@@ -396,11 +396,12 @@ exports['repository.pull - should call git pull'] = function (test) {
 };
 
 
-exports['repository.switchTo - should checkout&pull'] = function (test) {
-    var repository, path, checkout, pull, commitish;
+exports['repository.switchTo - should checkout&pull if on branch'] = function (test) {
+    var repository, path, checkout, pull, commitishs;
 
     path = chance.word();
     repository = new git.Repository(path);
+    commitishs = [];
 
     checkout = sinon.stub(repository, "checkout", function(commitish, callback) {
         callback(null);
@@ -410,20 +411,78 @@ exports['repository.switchTo - should checkout&pull'] = function (test) {
         callback(null);
     });
 
-    commitish = new git.Commitish(chance.word());
+    async.parallel(
+        [ git.Commitish.HEAD, git.Commitish.REMOTE ].map(function(type) {
+            return function(next) {
+                var commitish, hash, commit;
 
-    repository.switchTo(commitish, function(err) {
-        test.ok(!err);
+                hash = require("crypto").randomBytes(20).toString('hex');
+                commit = chance.word();
 
-        test.equals(checkout.callCount, 1);
-        test.equals(checkout.firstCall.args[0], commitish);
+                commitishs.push(commitish = new git.Commitish(hash, type, commit));
 
-        test.equals(pull.callCount, 1);
+                repository.switchTo(commitish, next);
+            }
+        })
+        ,
+        function(err) {
+            test.ok(!err);
 
-        test.ok(checkout.calledBefore(pull));
+            test.equals(checkout.callCount, 2);
+            test.equals(pull.callCount, 2);
 
-        test.done();
+            _.times(2, function(i) {
+                test.equals(checkout.getCall(i).args[0], commitishs[i]);
+                test.ok(checkout.getCall(i).calledBefore(pull.getCall(i)));
+            });
+
+            test.done();
+        }
+    );
+};
+
+exports['repository.switchTo - should checkout if on link'] = function (test) {
+    var repository, path, checkout, pull, commitishs;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+    commitishs = [];
+
+    checkout = sinon.stub(repository, "checkout", function(commitish, callback) {
+        callback(null);
     });
+
+    pull = sinon.stub(repository, "pull", function(callback) {
+        callback(null);
+    });
+
+    async.parallel(
+        [ git.Commitish.TAG, git.Commitish.COMMIT ].map(function(type) {
+            return function(next) {
+                var commitish, hash, commit;
+
+                hash = require("crypto").randomBytes(20).toString('hex');
+                commit = chance.word();
+
+                commitishs.push(commitish = new git.Commitish(hash, type, commit));
+
+                repository.switchTo(commitish, next);
+            }
+        })
+        ,
+        function(err) {
+            test.ok(!err);
+
+            test.equals(checkout.callCount, 2);
+            test.equals(pull.callCount, 0);
+
+            _.times(2, function(i) {
+                test.equals(checkout.getCall(i).args[0], commitishs[i]);
+            });
+
+            test.done();
+        }
+    );
 };
 
 exports['repository.resolve - should search in logs and refs given spec'] = function (test) {
