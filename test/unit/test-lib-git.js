@@ -128,7 +128,7 @@ exports['get - should not call git clone, but fetch, if there cached remote'] = 
         test.ok(repository instanceof git.Repository);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], "git fetch");
+        test.equals(exec.firstCall.args[0], "git fetch --tags");
 
         test.equals(stat.callCount, 1);
         test.equals(stat.firstCall.args[0], repository.path);
@@ -148,12 +148,12 @@ exports['repository.log - should call git log and return normalized results'] = 
     repository = new git.Repository(path);
 
     gitLog = _.map(_.range(gitLogCount = chance.integer({min: 1, max: 21})), function() {
-        return require("crypto").randomBytes(20).toString('hex');
+        return new git.Commitish(require("crypto").randomBytes(20).toString('hex'));
     });
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
         // simulate git log format
-        callback(null, gitLog.join("\n") + "\n");
+        callback(null, gitLog.map(function(c) { return c.hash; }).join("\n") + "\n");
     });
 
     repository.log(function(err, log) {
@@ -166,7 +166,7 @@ exports['repository.log - should call git log and return normalized results'] = 
 
         test.equals(log.length, gitLogCount);
         log.forEach(function(entry, index) {
-            test.equals(entry, gitLog[index]);
+            test.ok(entry.isEqual(gitLog[index]));
         });
 
         exec.restore();
@@ -184,28 +184,28 @@ exports['repository.ref - should call git show-refs and return normalized result
 
     values = [];
     gitRefs = _.map(_.range(gitRefsCount = chance.integer({min: 1, max: 21})), function(index) {
-        var line, value, remote;
+        var line, hash, value, remote;
 
-        line = [ require("crypto").randomBytes(20).toString('hex') ];
+        line = [ ( hash = require("crypto").randomBytes(20).toString('hex') ) ];
         value = chance.word();
 
         switch (index % 3) {
             case 0: {
                 line.push("refs/heads/" + value);
-                values.push({ type: "heads", value: value });
+                values.push(new git.Commitish(hash, git.Commitish.HEAD, value));
                 break;
             }
 
             case 1: {
                 line.push("refs/tags/" + value);
-                values.push({ type: "tags", value: value });
+                values.push(new git.Commitish(hash, git.Commitish.TAG, value));
                 break;
             }
 
             case 2: {
-                remote = chance.word();
+                remote = chance.word() + "REMOTE";
                 line.push("refs/remotes/" + remote + "/" + value);
-                values.push({ type: "remotes", remote: remote, value: value });
+                values.push(new git.RemoteCommitish(hash, git.Commitish.REMOTE, value, remote));
                 break;
             }
         }
@@ -229,7 +229,7 @@ exports['repository.ref - should call git show-refs and return normalized result
         test.equals(refs.length, gitRefsCount);
 
         refs.forEach(function(entry, index) {
-            test.same(entry, values[index]);
+            test.ok(entry.isEqual(values[index]));
         });
 
         exec.restore();
@@ -239,23 +239,27 @@ exports['repository.ref - should call git show-refs and return normalized result
 };
 
 
-exports['repository.checkout - should call git checkout'] = function (test) {
-    var repository, path, commit, exec;
+exports['repository.checkout - should call git checkout remote'] = function (test) {
+    var repository, path, remote, branch, commitish, exec, hash;
 
     path = chance.word();
     repository = new git.Repository(path);
 
-    commit = chance.word();
+    hash = require("crypto").randomBytes(20).toString('hex');
+    remote = chance.word();
+    branch = chance.word();
+
+    commitish = new git.RemoteCommitish(hash, git.Commitish.REMOTE, branch, remote);
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
         callback(null);
     });
 
-    repository.checkout(commit, function(err) {
+    repository.checkout(commitish, function(err) {
         test.ok(!err);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], 'git checkout ' + commit);
+        test.equals(exec.firstCall.args[0], 'git checkout -b ' + branch + ' ' + remote + '/' + branch);
         test.same(exec.firstCall.args[1], { cwd: path });
 
         exec.restore();
@@ -264,14 +268,63 @@ exports['repository.checkout - should call git checkout'] = function (test) {
     });
 };
 
-
-exports['repository.checkout - should call git checkout once'] = function (test) {
-    var repository, path, commit, exec;
+exports['repository.checkout - should call git checkout local'] = function (test) {
+    var repository, path, commit, hash, exec;
 
     path = chance.word();
     repository = new git.Repository(path);
 
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    sinon.spy(repository, "checkout");
+
     commit = chance.word();
+    hash = require("crypto").randomBytes(20).toString('hex');
+
+    async.parallel(
+        ["COMMIT", "TAG", "HEAD"].map(function(type) {
+            return function(next) {
+                var commitish;
+
+                commitish = type == "COMMIT"
+                    ? new git.Commitish(hash)
+                    : new git.Commitish(hash, git.Commitish[type], commit);
+
+                repository.checkout(commitish, next);
+            }
+        })
+        ,
+        function(err) {
+            test.ok(!err);
+
+            test.equals(exec.callCount, 3);
+
+            _.times(3, function(i) {
+                var commitish;
+
+                commitish = repository.checkout.getCall(i).args[0];
+
+                test.equals(exec.getCall(i).args[0], 'git checkout ' + ( commitish.type == git.Commitish.COMMIT ? commitish.hash : commitish.value ));
+                test.same(exec.getCall(i).args[1], { cwd: path });
+            });
+
+            exec.restore();
+
+            test.done();
+        }
+    );
+};
+
+
+exports['repository.checkout - should call git checkout once'] = function (test) {
+    var repository, path, commitish, exec;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    commitish = new git.Commitish(require("crypto").randomBytes(20).toString('hex'));
 
     exec = sinon.stub(cp, "exec", function(command, options, callback) {
         callback(null);
@@ -279,8 +332,8 @@ exports['repository.checkout - should call git checkout once'] = function (test)
 
     async.series(
         [
-            async.apply(repository.checkout.bind(repository), commit),
-            async.apply(repository.checkout.bind(repository), commit)
+            async.apply(repository.checkout.bind(repository), commitish),
+            async.apply(repository.checkout.bind(repository), commitish)
         ],
         function(err) {
             test.ok(!err);
@@ -309,7 +362,7 @@ exports['repository.fetch - should call git fetch'] = function (test) {
         test.ok(!err);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], 'git fetch');
+        test.equals(exec.firstCall.args[0], 'git fetch --tags');
         test.same(exec.firstCall.args[1], { cwd: path });
 
         exec.restore();
@@ -357,7 +410,7 @@ exports['repository.switchTo - should checkout&pull'] = function (test) {
         callback(null);
     });
 
-    commitish = chance.word();
+    commitish = new git.Commitish(chance.word());
 
     repository.switchTo(commitish, function(err) {
         test.ok(!err);
@@ -373,39 +426,45 @@ exports['repository.switchTo - should checkout&pull'] = function (test) {
     });
 };
 
-exports['repository.includes - should search in logs and refs given value'] = function (test) {
+exports['repository.resolve - should search in logs and refs given spec'] = function (test) {
     var repository, path, ref, log,
-        refValue, logValue;
+        specHead, specRemote, specCommit;
 
     path = chance.word();
     repository = new git.Repository(path);
 
-    refValue = chance.word();
-    logValue = chance.word();
+    specHead   = chance.word();
+    specRemote = chance.word();
+    specCommit = chance.word();
 
     ref = sinon.stub(repository, "ref", function(callback) {
-        callback(null, [ { value: refValue } ]);
+        callback(null, [
+            new git.Commitish(chance.word(), git.Commitish.HEAD,   specHead),
+            new git.Commitish(chance.word(), git.Commitish.REMOTE, specRemote)
+        ]);
     });
 
     log = sinon.stub(repository, "log", function(callback) {
-        callback(null, [ logValue ]);
+        callback(null, [ new git.Commitish(specCommit) ]);
     });
 
     async.parallel(
         [
-            async.apply(repository.includes.bind(repository), chance.word()),
-            async.apply(repository.includes.bind(repository), refValue),
-            async.apply(repository.includes.bind(repository), logValue)
+            async.apply(repository.resolve.bind(repository), chance.word()),
+            async.apply(repository.resolve.bind(repository), specHead),
+            async.apply(repository.resolve.bind(repository), specRemote),
+            async.apply(repository.resolve.bind(repository), specCommit)
         ],
         function(err, result) {
             test.ok(!err);
 
-            test.equals(ref.callCount, 3);
-            test.equals(log.callCount, 3);
+            test.equals(ref.callCount, 4);
+            test.equals(log.callCount, 4);
 
-            test.equals(result[0], false);
-            test.equals(result[1], true);
-            test.equals(result[2], true);
+            test.ok(result[0] === null);
+            test.ok(result[1] instanceof git.Commitish);
+            test.ok(result[2] instanceof git.Commitish);
+            test.ok(result[3] instanceof git.Commitish);
 
             test.done();
         }
@@ -414,12 +473,13 @@ exports['repository.includes - should search in logs and refs given value'] = fu
 
 
 exports['repository.snapshot - should switch to commitish and then copy snapshot in a temp folder'] = function (test) {
-    var repository, path, switchTo, cp, commit;
+    var repository, path, switchTo, cp, commit, commitish;
 
     path = chance.word();
     repository = new git.Repository(path);
 
     commit = chance.word();
+    commitish = new git.Commitish(git.Commitish.COMMIT, commit);
 
     switchTo = sinon.stub(repository, "switchTo", function(commitish, callback) {
         callback(null);
@@ -429,13 +489,13 @@ exports['repository.snapshot - should switch to commitish and then copy snapshot
         callback(null);
     });
 
-    repository.snapshot(commit, function(err, filepath) {
+    repository.snapshot(commitish, function(err, filepath) {
         var makePath;
 
         test.ok(!err);
 
         test.equals(switchTo.callCount, 1);
-        test.equals(switchTo.firstCall.args[0], commit);
+        test.equals(switchTo.firstCall.args[0], commitish);
 
         test.equals(mkdirp.callCount, 1);
         test.ok(_.isString(mkdirp.firstCall.args[0]));

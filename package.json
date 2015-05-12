@@ -19,6 +19,7 @@
     "fstream": "~0.1.18",
     "fstream-ignore": "~0.0.5",
     "inherits": "~1.0.0",
+    "inherits-js": "^0.1.0",
     "is-my-json-valid": "^2.10.1",
     "mime": "~1.2.4",
     "minimatch": "~0.2.5",
