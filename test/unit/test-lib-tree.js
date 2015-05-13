@@ -8,16 +8,19 @@ exports['extend - install new - reduce dep version'] = function (test) {
                 {
                     config: { name: 'foo', version: '0.0.1', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.1'
                 },
                 {
                     config: { name: 'foo', version: '0.0.2', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.2'
                 },
                 {
                     config: { name: 'foo', version: '0.0.3', dependencies: {} },
                     source: 'repository',
+                    priority: 1,
                     version: '0.0.3'
                 }
             ],
@@ -33,7 +36,8 @@ exports['extend - install new - reduce dep version'] = function (test) {
                 'foo': '<= 0.0.2'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
 
     var sources = [];
@@ -45,16 +49,19 @@ exports['extend - install new - reduce dep version'] = function (test) {
                     {
                         config: { name: 'foo', version: '0.0.1', dependencies: {} },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
                         config: { name: 'foo', version: '0.0.2', dependencies: {} },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.2'
                     },
                     {
                         config: { name: 'foo', version: '0.0.3', dependencies: {} },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.3'
                     }
                 ],
@@ -70,6 +77,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
                             dependencies: { 'foo': '<= 0.0.2' }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     }
                 ],
@@ -89,16 +97,19 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 {
                     config: { name: 'foo', version: '0.0.1', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.1'
                 },
                 {
                     config: { name: 'foo', version: '0.0.2', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.2'
                 },
                 {
                     config: { name: 'foo', version: '0.0.3', dependencies: {} },
                     source: 'repository',
+                    priority: 1,
                     version: '0.0.3'
                 }
             ],
@@ -114,6 +125,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                         dependencies: { 'foo': '<= 0.0.2' }
                     },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.1'
                 }
             ],
@@ -129,7 +141,8 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 'foo': '> 0.0.2'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
 
     var sources = [];
@@ -141,16 +154,19 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                     {
                         config: { name: 'foo', version: '0.0.1', dependencies: {} },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
                         config: { name: 'foo', version: '0.0.2', dependencies: {} },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.2'
                     },
                     {
                         config: { name: 'foo', version: '0.0.3', dependencies: {} },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.3'
                     }
                 ],
@@ -166,6 +182,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                             dependencies: { 'foo': '<= 0.0.2' }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
@@ -175,6 +192,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                             dependencies: { 'foo': '> 0.0.2' }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.2'
                     }
                 ],
@@ -195,11 +213,13 @@ exports['extend- install new - missing dep version'] = function (test) {
                 {
                     config: { name: 'foo', version: '0.0.2', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.2'
                 },
                 {
                     config: { name: 'foo', version: '0.0.3', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.3'
                 }
             ],
@@ -215,7 +235,8 @@ exports['extend- install new - missing dep version'] = function (test) {
                 'foo': '< 0.0.2'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
     var sources = [];
     tree.extend(bar, sources, packages, function (err, packages) {
@@ -236,6 +257,7 @@ exports['extend - install new - missing dep package'] = function (test) {
                 {
                     config: { name: 'foo', version: '0.0.3', dependencies: {} },
                     source: 'local',
+                    priority: 0,
                     version: '0.0.3'
                 }
             ],
@@ -252,7 +274,8 @@ exports['extend - install new - missing dep package'] = function (test) {
                 'baz': null
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
     var sources = [];
     tree.extend(bar, sources, packages, function (err, packages) {
@@ -275,7 +298,8 @@ exports['build - fetch from sources'] = function (test) {
                 'bar': '>= 0.0.2'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
     var sources = [
         function (def, callback) {
@@ -317,6 +341,7 @@ exports['build - fetch from sources'] = function (test) {
                             }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     }
                 ],
@@ -332,6 +357,7 @@ exports['build - fetch from sources'] = function (test) {
                             dependencies: {}
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
@@ -341,6 +367,7 @@ exports['build - fetch from sources'] = function (test) {
                             dependencies: {}
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.2'
                     }
                 ],
@@ -364,7 +391,8 @@ exports['build - check multiple sources'] = function (test) {
                 'bar': '>= 0.0.2'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
     var sources = [
         function (def, callback) {
@@ -425,6 +453,7 @@ exports['build - check multiple sources'] = function (test) {
                             }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     }
                 ],
@@ -440,6 +469,7 @@ exports['build - check multiple sources'] = function (test) {
                             dependencies: {}
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
@@ -449,6 +479,7 @@ exports['build - check multiple sources'] = function (test) {
                             dependencies: {}
                         },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.1'
                     },
                     {
@@ -458,6 +489,7 @@ exports['build - check multiple sources'] = function (test) {
                             dependencies: {}
                         },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.2'
                     }
                 ],
@@ -480,7 +512,8 @@ exports['build - check only as many sources as needed'] = function (test) {
                 'bar': '>= 0.0.3'
             }
         },
-        source: 'local'
+        source: 'local',
+        priority: 0
     };
     var sources = [
         function (def, callback) {
@@ -576,6 +609,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                             }
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     }
                 ],
@@ -591,6 +625,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                             dependencies: {}
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.1'
                     },
                     {
@@ -600,6 +635,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                             dependencies: {}
                         },
                         source: 'local',
+                        priority: 0,
                         version: '0.0.2'
                     },
                     {
@@ -609,6 +645,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                             dependencies: {}
                         },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.2'
                     },
                     {
@@ -618,6 +655,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                             dependencies: {}
                         },
                         source: 'repository',
+                        priority: 1,
                         version: '0.0.3'
                     }
                 ],
