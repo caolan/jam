@@ -6,19 +6,19 @@ exports['extend - install new - reduce dep version'] = function (test) {
         'foo': {
             versions: [
                 {
-                    config: { name: 'foo', version: '0.0.1', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.1', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.1'
                 },
                 {
-                    config: { name: 'foo', version: '0.0.2', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.2', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.2'
                 },
                 {
-                    config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                     source: 'repository',
                     priority: 1,
                     version: '0.0.3'
@@ -32,8 +32,10 @@ exports['extend - install new - reduce dep version'] = function (test) {
         config: {
             name: 'bar',
             version: '0.0.1',
-            dependencies: {
-                'foo': '<= 0.0.2'
+            jam: {
+                dependencies: {
+                    'foo': '<= 0.0.2'
+                }
             }
         },
         source: 'local',
@@ -47,19 +49,19 @@ exports['extend - install new - reduce dep version'] = function (test) {
             'foo': {
                 versions: [
                     {
-                        config: { name: 'foo', version: '0.0.1', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.1', jam: { dependencies: {} } },
                         source: 'local',
                         priority: 0,
                         version: '0.0.1'
                     },
                     {
-                        config: { name: 'foo', version: '0.0.2', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.2', jam: { dependencies: {} } },
                         source: 'local',
                         priority: 0,
                         version: '0.0.2'
                     },
                     {
-                        config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                         source: 'repository',
                         priority: 1,
                         version: '0.0.3'
@@ -74,7 +76,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: { 'foo': '<= 0.0.2' }
+                            jam: { dependencies: { 'foo': '<= 0.0.2' } }
                         },
                         source: 'local',
                         priority: 0,
@@ -95,19 +97,19 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
         'foo': {
             versions: [
                 {
-                    config: { name: 'foo', version: '0.0.1', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.1', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.1'
                 },
                 {
-                    config: { name: 'foo', version: '0.0.2', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.2', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.2'
                 },
                 {
-                    config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                     source: 'repository',
                     priority: 1,
                     version: '0.0.3'
@@ -122,7 +124,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                     config: {
                         name: 'bar',
                         version: '0.0.1',
-                        dependencies: { 'foo': '<= 0.0.2' }
+                        jam: { dependencies: { 'foo': '<= 0.0.2' } }
                     },
                     source: 'local',
                     priority: 0,
@@ -137,9 +139,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
         config: {
             name: 'bar',
             version: '0.0.2',
-            dependencies: {
-                'foo': '> 0.0.2'
-            }
+            jam: { dependencies: { 'foo': '> 0.0.2' } }
         },
         source: 'local',
         priority: 0
@@ -152,19 +152,19 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
             'foo': {
                 versions: [
                     {
-                        config: { name: 'foo', version: '0.0.1', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.1', jam: { dependencies: {} } },
                         source: 'local',
                         priority: 0,
                         version: '0.0.1'
                     },
                     {
-                        config: { name: 'foo', version: '0.0.2', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.2', jam: { dependencies: {} } },
                         source: 'local',
                         priority: 0,
                         version: '0.0.2'
                     },
                     {
-                        config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                        config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                         source: 'repository',
                         priority: 1,
                         version: '0.0.3'
@@ -179,7 +179,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: { 'foo': '<= 0.0.2' }
+                            jam: { dependencies: { 'foo': '<= 0.0.2' } }
                         },
                         source: 'local',
                         priority: 0,
@@ -189,7 +189,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: { 'foo': '> 0.0.2' }
+                            jam: { dependencies: { 'foo': '> 0.0.2' } }
                         },
                         source: 'local',
                         priority: 0,
@@ -211,13 +211,13 @@ exports['extend- install new - missing dep version'] = function (test) {
         'foo': {
             versions: [
                 {
-                    config: { name: 'foo', version: '0.0.2', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.2', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.2'
                 },
                 {
-                    config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.3'
@@ -231,9 +231,7 @@ exports['extend- install new - missing dep version'] = function (test) {
         config: {
             name: 'bar',
             version: '0.0.1',
-            dependencies: {
-                'foo': '< 0.0.2'
-            }
+            jam: { dependencies: { 'foo': '< 0.0.2' } }
         },
         source: 'local',
         priority: 0
@@ -255,7 +253,7 @@ exports['extend - install new - missing dep package'] = function (test) {
         'foo': {
             versions: [
                 {
-                    config: { name: 'foo', version: '0.0.3', dependencies: {} },
+                    config: { name: 'foo', version: '0.0.3', jam: { dependencies: {} } },
                     source: 'local',
                     priority: 0,
                     version: '0.0.3'
@@ -269,9 +267,11 @@ exports['extend - install new - missing dep package'] = function (test) {
         config: {
             name: 'bar',
             version: '0.0.1',
-            dependencies: {
-                'foo': null,
-                'baz': null
+            jam: {
+                dependencies: {
+                    'foo': null,
+                    'baz': null
+                }
             }
         },
         source: 'local',
@@ -294,8 +294,10 @@ exports['build - fetch from sources'] = function (test) {
         config: {
             name: 'foo',
             version: '0.0.1',
-            dependencies: {
-                'bar': '>= 0.0.2'
+            jam: {
+                dependencies: {
+                    'bar': '>= 0.0.2'
+                }
             }
         },
         source: 'local',
@@ -310,7 +312,7 @@ exports['build - fetch from sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         version: '0.0.1'
@@ -319,7 +321,7 @@ exports['build - fetch from sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         version: '0.0.2'
@@ -336,8 +338,10 @@ exports['build - fetch from sources'] = function (test) {
                         config: {
                             name: 'foo',
                             version: '0.0.1',
-                            dependencies: {
-                                'bar': '>= 0.0.2'
+                            jam: {
+                                dependencies: {
+                                    'bar': '>= 0.0.2'
+                                }
                             }
                         },
                         source: 'local',
@@ -354,7 +358,7 @@ exports['build - fetch from sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         priority: 0,
@@ -364,7 +368,7 @@ exports['build - fetch from sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         priority: 0,
@@ -387,9 +391,7 @@ exports['build - check multiple sources'] = function (test) {
         config: {
             name: 'foo',
             version: '0.0.1',
-            dependencies: {
-                'bar': '>= 0.0.2'
-            }
+            jam: { dependencies: { 'bar': '>= 0.0.2' } },
         },
         source: 'local',
         priority: 0
@@ -404,7 +406,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         version: '0.0.1'
@@ -421,7 +423,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         version: '0.0.1'
@@ -430,7 +432,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         version: '0.0.2'
@@ -448,9 +450,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'foo',
                             version: '0.0.1',
-                            dependencies: {
-                                'bar': '>= 0.0.2'
-                            }
+                            jam: { dependencies: { 'bar': '>= 0.0.2' } }
                         },
                         source: 'local',
                         priority: 0,
@@ -466,7 +466,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         priority: 0,
@@ -476,7 +476,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         priority: 1,
@@ -486,7 +486,7 @@ exports['build - check multiple sources'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         priority: 1,
@@ -508,9 +508,7 @@ exports['build - check only as many sources as needed'] = function (test) {
         config: {
             name: 'foo',
             version: '0.0.1',
-            dependencies: {
-                'bar': '>= 0.0.3'
-            }
+            jam: { dependencies: { 'bar': '>= 0.0.3' } }
         },
         source: 'local',
         priority: 0
@@ -525,7 +523,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         version: '0.0.1'
@@ -534,7 +532,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         version: '0.0.2'
@@ -551,7 +549,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         version: '0.0.2'
@@ -560,7 +558,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.3',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         version: '0.0.3'
@@ -577,7 +575,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.3',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'space',
                         version: '0.0.3'
@@ -586,7 +584,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.4',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'space',
                         version: '0.0.4'
@@ -604,9 +602,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'foo',
                             version: '0.0.1',
-                            dependencies: {
-                                'bar': '>= 0.0.3'
-                            }
+                            jam: { dependencies: { 'bar': '>= 0.0.3' } }
                         },
                         source: 'local',
                         priority: 0,
@@ -622,7 +618,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.1',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         priority: 0,
@@ -632,7 +628,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'local',
                         priority: 0,
@@ -642,7 +638,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.2',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         priority: 1,
@@ -652,7 +648,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         config: {
                             name: 'bar',
                             version: '0.0.3',
-                            dependencies: {}
+                            jam: { dependencies: {} }
                         },
                         source: 'repository',
                         priority: 1,
