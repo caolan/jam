@@ -20,7 +20,6 @@
     "fstream-ignore": "~0.0.5",
     "inherits": "~1.0.0",
     "inherits-js": "^0.1.0",
-    "is-my-json-valid": "^2.10.1",
     "mime": "~1.2.4",
     "minimatch": "~0.2.5",
     "mkdirp": "~0.3.2",
@@ -29,6 +28,7 @@
     "request": "~2.9.202",
     "requirejs": "2.1.4",
     "rimraf": "~2.0.1",
+    "schinquirer": "^0.1.1",
     "semver": "~4.3.3",
     "tar": "~0.1.13",
     "underscore": "~1.8.3"

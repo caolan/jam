@@ -24,7 +24,7 @@ for (var i = 0; i < args.length; i += 1) {
 jamrc.load(function (err, settings) {
 
     function usage() {
-        console.log('Usage: jam COMMAND [ARGS]');
+        console.log('jam COMMAND [ARGS]');
         console.log('');
         console.log('Available commands:');
         var len = utils.longest(Object.keys(commands));
@@ -44,7 +44,18 @@ jamrc.load(function (err, settings) {
     else {
         var cmd = args.shift();
         if (cmd === '-h' || cmd === '--help') {
-            usage();
+            var concrete = args.shift();
+
+            console.log('Usage:\n');
+
+            if (concrete && commands[concrete]) {
+                console.log(commands[concrete].usage);
+            } else {
+                usage();
+            }
+
+            console.log('\n');
+            logger.clean_exit = true;
         }
         else if (cmd === '-v' || cmd === '--version') {
             utils.getJamVersion(function (err, ver) {
