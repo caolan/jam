@@ -140,6 +140,30 @@ exports['get - should not call git clone, but fetch, if there cached remote'] = 
     });
 };
 
+exports['fromDirectory - should test directory with git status'] = function(test) {
+    var exec, directory;
+
+    directory = chance.word();
+
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        callback(null);
+    });
+
+    git.fromDirectory(directory, function(err, repository) {
+        test.ok(!err);
+        test.ok(repository instanceof git.Repository);
+
+        test.equals(repository.path, directory);
+
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], "git status");
+
+        exec.restore();
+
+        test.done();
+    });
+};
+
 
 exports['repository.log - should call git log and return normalized results'] = function (test) {
     var repository, path, exec, gitLogCount, gitLog;
@@ -259,7 +283,7 @@ exports['repository.checkout - should call git checkout remote'] = function (tes
         test.ok(!err);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], 'git checkout -b ' + branch + ' ' + remote + '/' + branch);
+        test.ok((new RegExp('git checkout \\-b [a-z0-9]+ ' + remote + '\\/' + branch)).test(exec.firstCall.args[0]));
         test.same(exec.firstCall.args[1], { cwd: path });
 
         exec.restore();
@@ -487,29 +511,33 @@ exports['repository.switchTo - should checkout if on link'] = function (test) {
 
 exports['repository.resolve - should search in logs and refs given spec'] = function (test) {
     var repository, path, ref, log,
-        specHead, specRemote, specCommit;
+        specHead, specRemote, specCommit, specRandom;
 
     path = chance.word();
     repository = new git.Repository(path);
 
-    specHead   = chance.word();
-    specRemote = chance.word();
-    specCommit = chance.word();
+    specRandom = new git.Spec(chance.word());
+    specHead   = new git.Spec(chance.word());
+    specCommit = new git.Spec(chance.word());
+
+    specRemote = new git.Spec(chance.word());
+    specRemote.type = git.Commitish.REMOTE;
+    specRemote.remote = chance.word();
 
     ref = sinon.stub(repository, "ref", function(callback) {
         callback(null, [
-            new git.Commitish(chance.word(), git.Commitish.HEAD,   specHead),
-            new git.Commitish(chance.word(), git.Commitish.REMOTE, specRemote)
+            new git.Commitish(chance.word(), git.Commitish.HEAD, specHead.value),
+            new git.RemoteCommitish(chance.word(), git.Commitish.REMOTE, specRemote.value, specRemote.remote)
         ]);
     });
 
     log = sinon.stub(repository, "log", function(callback) {
-        callback(null, [ new git.Commitish(specCommit) ]);
+        callback(null, [ new git.Commitish(specCommit.value, git.Commitish.COMMIT, specCommit.value) ]);
     });
 
     async.parallel(
         [
-            async.apply(repository.resolve.bind(repository), chance.word()),
+            async.apply(repository.resolve.bind(repository), specRandom),
             async.apply(repository.resolve.bind(repository), specHead),
             async.apply(repository.resolve.bind(repository), specRemote),
             async.apply(repository.resolve.bind(repository), specCommit)
@@ -528,6 +556,52 @@ exports['repository.resolve - should search in logs and refs given spec'] = func
             test.done();
         }
     );
+};
+
+exports['repository.remotes - should return list of remotes'] = function (test) {
+    var repository, path, exec, remotesCount, remotes, tpl;
+
+    path = chance.word();
+    repository = new git.Repository(path);
+
+    remotes = _.map(_.range(remotesCount = chance.integer({min: 1, max: 21})), function() {
+        return {
+            name: chance.word(),
+            uri:  chance.url(),
+            type: Math.random() > 0.5 ? "fetch" : "push"
+        };
+    });
+
+    tpl = _.template("<%= name %>\t<%= uri %> (<%= type %>)");
+    exec = sinon.stub(cp, "exec", function(command, options, callback) {
+        // simulate git remote -v format
+        callback(
+            null,
+            remotes
+                .map(function(remote) {
+                    return tpl(remote);
+                })
+                .join("\n")
+        );
+    });
+
+    repository.remotes(function(err, result) {
+        test.ok(!err);
+        test.ok(_.isArray(result));
+
+        test.equals(exec.callCount, 1);
+        test.equals(exec.firstCall.args[0], 'git remote -v');
+        test.same(exec.firstCall.args[1], { cwd: path });
+
+        test.equals(result.length, remotesCount);
+        result.forEach(function(entry, index) {
+            test.ok(_.isEqual(entry, remotes[index]));
+        });
+
+        exec.restore();
+
+        test.done();
+    });
 };
 
 
