@@ -43,8 +43,9 @@ exports['extend - install new - reduce dep version'] = function (test) {
     };
 
     var sources = [];
+    var translators = [];
 
-    tree.extend(bar, sources, packages, function (err, packages) {
+    tree.extend(bar, sources, translators, packages, function (err, packages) {
         test.same(packages, {
             'foo': {
                 versions: [
@@ -68,7 +69,9 @@ exports['extend - install new - reduce dep version'] = function (test) {
                     }
                 ],
                 current_version: '0.0.2',
-                ranges: {'bar': '<= 0.0.2'}
+                ranges: {
+                    'bar': { source: '<= 0.0.2', range: '<= 0.0.2' }
+                }
             },
             'bar': {
                 versions: [
@@ -116,7 +119,9 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 }
             ],
             current_version: '0.0.2',
-            ranges: {bar: '<= 0.0.2'}
+            ranges: {
+                bar: { source: '<= 0.0.2', range: '<= 0.0.2' }
+            }
         },
         'bar': {
             versions: [
@@ -146,8 +151,9 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
     };
 
     var sources = [];
+    var translators = [];
 
-    tree.extend(bar, sources, packages, function (err, packages) {
+    tree.extend(bar, sources, translators, packages, function (err, packages) {
         test.same(packages, {
             'foo': {
                 versions: [
@@ -171,7 +177,9 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                     }
                 ],
                 current_version: '0.0.3',
-                ranges: {bar: '> 0.0.2'}
+                ranges: {
+                    bar: { source: '> 0.0.2', range: '> 0.0.2' }
+                }
             },
             'bar': {
                 versions: [
@@ -237,7 +245,8 @@ exports['extend- install new - missing dep version'] = function (test) {
         priority: 0
     };
     var sources = [];
-    tree.extend(bar, sources, packages, function (err, packages) {
+    var translators = [];
+    tree.extend(bar, sources, translators, packages, function (err, packages) {
         test.ok(
             /No matching version for 'foo'/.test(err.message),
             "No matching version for 'foo'"
@@ -278,7 +287,16 @@ exports['extend - install new - missing dep package'] = function (test) {
         priority: 0
     };
     var sources = [];
-    tree.extend(bar, sources, packages, function (err, packages) {
+    var translators = [
+        function(range, callback) {
+            if (range == null || range == "") {
+                return callback(null, "*");
+            }
+
+            callback(null);
+        }
+    ];
+    tree.extend(bar, sources, translators, packages, function (err, packages) {
         test.ok(
             /No package for 'baz'/.test(err.message),
             "No package for 'baz'"
@@ -305,7 +323,7 @@ exports['build - fetch from sources'] = function (test) {
     };
     var sources = [
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.2' });
+            test.same(def, { name: 'bar', range: '>= 0.0.2', translation: '>= 0.0.2' });
             process.nextTick(function () {
                 callback(null, [
                     {
@@ -330,7 +348,8 @@ exports['build - fetch from sources'] = function (test) {
             })
         }
     ];
-    tree.build(foo, sources, function (err, packages) {
+    var translators = [];
+    tree.build(foo, sources, translators, function (err, packages) {
         test.same(packages, {
             'foo': {
                 versions: [
@@ -375,11 +394,211 @@ exports['build - fetch from sources'] = function (test) {
                         version: '0.0.2'
                     }
                 ],
-                ranges: {'foo': '>= 0.0.2'},
+                ranges: {
+                    'foo': { source: '>= 0.0.2', range: '>= 0.0.2' }
+                },
                 current_version: '0.0.2'
             }
         });
         test.done(err);
+    });
+};
+
+
+exports['build - translate from translators'] = function (test) {
+    test.expect(2);
+
+    var translation = {
+        'abc': '0.0.2'
+    };
+
+    var foo = {
+        config: {
+            name: 'foo',
+            version: '0.0.1',
+            jam: {
+                dependencies: {
+                    'bar': 'abc'
+                }
+            }
+        },
+        source: 'local',
+        priority: 0
+    };
+
+    var sources = [
+        function (def, callback) {
+            test.same(def, { name: 'bar', range: 'abc', translation: '0.0.2' });
+            process.nextTick(function () {
+                callback(null, [
+                    {
+                        config: {
+                            name: 'bar',
+                            version: '0.0.2',
+                            jam: { dependencies: {} }
+                        },
+                        source: 'local',
+                        version: '0.0.2'
+                    }
+                ]);
+            })
+        }
+    ];
+    var translators = [
+        function(range, cb) {
+            var result;
+
+            if (result = translation[range]) {
+                return cb(null, result);
+            }
+
+            cb(null);
+        }
+    ];
+
+    tree.build(foo, sources, translators, function (err, packages) {
+        test.same(packages, {
+            'foo': {
+                versions: [
+                    {
+                        config: {
+                            name: 'foo',
+                            version: '0.0.1',
+                            jam: {
+                                dependencies: {
+                                    'bar': 'abc'
+                                }
+                            }
+                        },
+                        source: 'local',
+                        priority: 0,
+                        version: '0.0.1'
+                    }
+                ],
+                ranges: {},
+                current_version: '0.0.1'
+            },
+            'bar': {
+                versions: [
+                    {
+                        config: {
+                            name: 'bar',
+                            version: '0.0.2',
+                            jam: { dependencies: {} }
+                        },
+                        source: 'local',
+                        priority: 0,
+                        version: '0.0.2'
+                    }
+                ],
+                ranges: {
+                    'foo': { source: 'abc', range: '0.0.2' }
+                },
+                current_version: '0.0.2'
+            }
+        });
+        test.done(err);
+    });
+};
+
+
+exports['build - fall in no matching version'] = function (test) {
+    test.expect(1);
+
+    var translation = {
+        'git://path.to/repo.git': '0.2.0'
+    };
+
+    var foo = {
+        config: {
+            name: 'foo',
+            version: '0.0.1',
+            jam: {
+                dependencies: {
+                    'bar': 'git://path.to/repo.git',
+                    'baz': '*'
+                }
+            }
+        },
+        source: 'local',
+        priority: 0
+    };
+
+    var sources = [
+        function (def, callback) {
+            process.nextTick(function () {
+                callback(null, (def.name == "bar" && def.range == "git://path.to/repo.git") ? [
+                    {
+                        config: {
+                            name:    def.name,
+                            version: def.translation
+                        },
+                        source: 'git',
+                        version: def.translation
+                    }
+                ] : []);
+            })
+        },
+        function (def, callback) {
+            var result;
+
+            switch (def.name) {
+                case "bar": {
+                    result = {
+                        config: {
+                            name:    "bar",
+                            version: "0.1.5"
+                        },
+                        source: 'repository',
+                        version: "0.1.5"
+                    };
+
+                    break;
+                }
+
+                case "baz": {
+                    result = {
+                        config: {
+                            name:    "baz",
+                            version: "0.1.0",
+                            jam: {
+                                dependencies: {
+                                    "bar": "~0.1.0"
+                                }
+                            }
+                        },
+                        source: 'repository',
+                        version: "0.1.0"
+                    };
+
+                    break;
+                }
+            }
+
+            process.nextTick(function () {
+                callback(null, [result]);
+            });
+        }
+    ];
+    var translators = [
+        function(range, cb) {
+            var result;
+
+            if (result = translation[range]) {
+                return cb(null, result);
+            }
+
+            cb(null);
+        }
+    ];
+
+    tree.build(foo, sources, translators, function (err, packages) {
+        test.ok(
+            /No matching version for 'bar'/.test(err.message.split("\n")[0]),
+            "No matching version for 'bar'"
+        );
+
+        test.done();
     });
 };
 
@@ -398,7 +617,7 @@ exports['build - check multiple sources'] = function (test) {
     };
     var sources = [
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.2' });
+            test.same(def, { name: 'bar', range: '>= 0.0.2', translation: '>= 0.0.2' });
             source_calls.push('one');
             process.nextTick(function () {
                 callback(null, [
@@ -415,7 +634,7 @@ exports['build - check multiple sources'] = function (test) {
             })
         },
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.2' });
+            test.same(def, { name: 'bar', range: '>= 0.0.2', translation: '>= 0.0.2' });
             source_calls.push('two');
             process.nextTick(function () {
                 callback(null, [
@@ -441,7 +660,8 @@ exports['build - check multiple sources'] = function (test) {
             })
         }
     ];
-    tree.build(foo, sources, function (err, packages) {
+    var translators = [];
+    tree.build(foo, sources, translators, function (err, packages) {
         test.same(source_calls, ['one', 'two']);
         test.same(packages, {
             'foo': {
@@ -493,7 +713,9 @@ exports['build - check multiple sources'] = function (test) {
                         version: '0.0.2'
                     }
                 ],
-                ranges: {'foo': '>= 0.0.2'},
+                ranges: {
+                    'foo': { source: '>= 0.0.2', range: '>= 0.0.2' }
+                },
                 current_version: '0.0.2'
             }
         });
@@ -515,7 +737,7 @@ exports['build - check only as many sources as needed'] = function (test) {
     };
     var sources = [
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.3' });
+            test.same(def, { name: 'bar', range: '>= 0.0.3', translation: '>= 0.0.3' });
             source_calls.push('one');
             process.nextTick(function () {
                 callback(null, [
@@ -541,7 +763,7 @@ exports['build - check only as many sources as needed'] = function (test) {
             });
         },
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.3' });
+            test.same(def, { name: 'bar', range: '>= 0.0.3', translation: '>= 0.0.3' });
             source_calls.push('two');
             process.nextTick(function () {
                 callback(null, [
@@ -567,7 +789,7 @@ exports['build - check only as many sources as needed'] = function (test) {
             });
         },
         function (def, callback) {
-            test.same(def, { name: 'bar', range: '>= 0.0.3' });
+            test.same(def, { name: 'bar', range: '>= 0.0.3', translation: '>= 0.0.3' });
             source_calls.push('two');
             process.nextTick(function () {
                 callback(null, [
@@ -593,7 +815,8 @@ exports['build - check only as many sources as needed'] = function (test) {
             });
         }
     ];
-    tree.build(foo, sources, function (err, packages) {
+    var translators = [];
+    tree.build(foo, sources, translators, function (err, packages) {
         test.same(source_calls, ['one', 'two']);
         test.same(packages, {
             'foo': {
@@ -655,7 +878,9 @@ exports['build - check only as many sources as needed'] = function (test) {
                         version: '0.0.3'
                     }
                 ],
-                ranges: {'foo': '>= 0.0.3'},
+                ranges: {
+                    'foo': { source: '>= 0.0.3', range: '>= 0.0.3' }
+                },
                 current_version: '0.0.3'
             }
         });
