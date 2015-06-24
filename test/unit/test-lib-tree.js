@@ -1,10 +1,10 @@
 var tree = require('../../lib/tree'),
     logger = require("../../lib/logger");
 
-exports['build - fall!!!'] = function (test) {
-    test.expect(1);
+//logger.level = "verbose";
 
-    logger.level = "verbose";
+exports['build - should work with async sources'] = function (test) {
+    test.expect(1);
 
     var translation = {
         'git://path.to/repo.git': '1.0.5'
@@ -124,10 +124,10 @@ exports['build - fall!!!'] = function (test) {
         }
     ];
     var translators = [
-        function(range, cb) {
+        function(def, cb) {
             var result;
 
-            if (result = translation[range]) {
+            if (result = translation[def.range]) {
                 return setTimeout(function() {
                     cb(null, result);
                 }, 500);
@@ -143,9 +143,6 @@ exports['build - fall!!!'] = function (test) {
         test.done(err);
     });
 };
-
-return;
-
 
 exports['extend - install new - reduce dep version'] = function (test) {
     var packages = {
@@ -171,7 +168,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
                 }
             ],
             current_version: '0.0.3',
-            ranges: {}
+            requirements: []
         }
     };
     var bar = {
@@ -215,9 +212,13 @@ exports['extend - install new - reduce dep version'] = function (test) {
                     }
                 ],
                 current_version: '0.0.2',
-                ranges: {
-                    'bar': { source: '<= 0.0.2', range: '<= 0.0.2' }
-                }
+                requirements: [
+                    {
+                        path: { parents: [ 'bar' ], name: 'foo', enabled: true },
+                        range: { range: '<= 0.0.2', source: '<= 0.0.2' },
+                        enabled: true
+                    }
+                ]
             },
             'bar': {
                 versions: [
@@ -233,7 +234,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
                     }
                 ],
                 current_version: '0.0.1',
-                ranges: {}
+                requirements: []
             }
         });
         test.done(err);
@@ -265,9 +266,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 }
             ],
             current_version: '0.0.2',
-            ranges: {
-                bar: { source: '<= 0.0.2', range: '<= 0.0.2' }
-            }
+            requirements: []
         },
         'bar': {
             versions: [
@@ -283,7 +282,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 }
             ],
             current_version: '0.0.1',
-            ranges: {}
+            requirements: []
         }
     };
     var bar = {
@@ -323,9 +322,13 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                     }
                 ],
                 current_version: '0.0.3',
-                ranges: {
-                    bar: { source: '> 0.0.2', range: '> 0.0.2' }
-                }
+                requirements: [
+                    {
+                        path: { parents: [ 'bar' ], name: 'foo', enabled: true },
+                        range: { range: '> 0.0.2', source: '> 0.0.2' },
+                        enabled: true
+                    }
+                ]
             },
             'bar': {
                 versions: [
@@ -351,7 +354,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                     }
                 ],
                 current_version: '0.0.2',
-                ranges: {}
+                requirements: []
             }
         });
         test.done(err);
@@ -378,7 +381,7 @@ exports['extend- install new - missing dep version'] = function (test) {
                 }
             ],
             current_version: '0.0.3',
-            ranges: {}
+            requirements: []
         }
     };
     var bar = {
@@ -415,7 +418,7 @@ exports['extend - install new - missing dep package'] = function (test) {
                 }
             ],
             current_version: '0.0.3',
-            ranges: {}
+            requirements: []
         }
     };
     var bar = {
@@ -434,8 +437,8 @@ exports['extend - install new - missing dep package'] = function (test) {
     };
     var sources = [];
     var translators = [
-        function(range, callback) {
-            if (range == null || range == "") {
+        function(def, callback) {
+            if (def.range == null || def.range == "") {
                 return callback(null, "*");
             }
 
@@ -514,7 +517,7 @@ exports['build - fetch from sources'] = function (test) {
                         version: '0.0.1'
                     }
                 ],
-                ranges: {},
+                requirements: [],
                 current_version: '0.0.1'
             },
             'bar': {
@@ -540,9 +543,13 @@ exports['build - fetch from sources'] = function (test) {
                         version: '0.0.2'
                     }
                 ],
-                ranges: {
-                    'foo': { source: '>= 0.0.2', range: '>= 0.0.2' }
-                },
+                requirements: [
+                    {
+                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        range: { range: '>= 0.0.2', source: '>= 0.0.2' },
+                        enabled: true
+                    }
+                ],
                 current_version: '0.0.2'
             }
         });
@@ -591,10 +598,10 @@ exports['build - translate from translators'] = function (test) {
         }
     ];
     var translators = [
-        function(range, cb) {
+        function(def, cb) {
             var result;
 
-            if (result = translation[range]) {
+            if (result = translation[def.range]) {
                 return cb(null, result);
             }
 
@@ -621,7 +628,7 @@ exports['build - translate from translators'] = function (test) {
                         version: '0.0.1'
                     }
                 ],
-                ranges: {},
+                requirements: [],
                 current_version: '0.0.1'
             },
             'bar': {
@@ -637,9 +644,13 @@ exports['build - translate from translators'] = function (test) {
                         version: '0.0.2'
                     }
                 ],
-                ranges: {
-                    'foo': { source: 'abc', range: '0.0.2' }
-                },
+                requirements: [
+                    {
+                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        range: { range: '0.0.2', source: 'abc' },
+                        enabled: true
+                    }
+                ],
                 current_version: '0.0.2'
             }
         });
@@ -727,10 +738,10 @@ exports['build - fall in no matching version'] = function (test) {
         }
     ];
     var translators = [
-        function(range, cb) {
+        function(def, cb) {
             var result;
 
-            if (result = translation[range]) {
+            if (result = translation[def.range]) {
                 return cb(null, result);
             }
 
@@ -823,7 +834,7 @@ exports['build - check multiple sources'] = function (test) {
                         version: '0.0.1'
                     }
                 ],
-                ranges: {},
+                requirements: [],
                 current_version: '0.0.1'
             },
             'bar': {
@@ -859,9 +870,13 @@ exports['build - check multiple sources'] = function (test) {
                         version: '0.0.2'
                     }
                 ],
-                ranges: {
-                    'foo': { source: '>= 0.0.2', range: '>= 0.0.2' }
-                },
+                requirements:  [
+                    {
+                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        range: { range: '>= 0.0.2', source: '>= 0.0.2' },
+                        enabled: true
+                    }
+                ],
                 current_version: '0.0.2'
             }
         });
@@ -978,7 +993,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                         version: '0.0.1'
                     }
                 ],
-                ranges: {},
+                requirements: [],
                 current_version: '0.0.1'
             },
             'bar': {
@@ -1024,9 +1039,13 @@ exports['build - check only as many sources as needed'] = function (test) {
                         version: '0.0.3'
                     }
                 ],
-                ranges: {
-                    'foo': { source: '>= 0.0.3', range: '>= 0.0.3' }
-                },
+                requirements: [
+                    {
+                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        range: { range: '>= 0.0.3', source: '>= 0.0.3' },
+                        enabled: true
+                    }
+                ],
                 current_version: '0.0.3'
             }
         });
