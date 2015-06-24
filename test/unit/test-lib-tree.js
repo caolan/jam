@@ -45,7 +45,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
     var sources = [];
     var translators = [];
 
-    tree.extend(bar, sources, translators, packages, function (err, packages) {
+    tree.extend([], bar, sources, translators, packages, function (err, packages) {
         test.same(packages, {
             'foo': {
                 versions: [
@@ -153,7 +153,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
     var sources = [];
     var translators = [];
 
-    tree.extend(bar, sources, translators, packages, function (err, packages) {
+    tree.extend([], bar, sources, translators, packages, function (err, packages) {
         test.same(packages, {
             'foo': {
                 versions: [
@@ -246,7 +246,7 @@ exports['extend- install new - missing dep version'] = function (test) {
     };
     var sources = [];
     var translators = [];
-    tree.extend(bar, sources, translators, packages, function (err, packages) {
+    tree.extend([], bar, sources, translators, packages, function (err, packages) {
         test.ok(
             /No matching version for 'foo'/.test(err.message),
             "No matching version for 'foo'"
@@ -296,7 +296,7 @@ exports['extend - install new - missing dep package'] = function (test) {
             callback(null);
         }
     ];
-    tree.extend(bar, sources, translators, packages, function (err, packages) {
+    tree.extend([], bar, sources, translators, packages, function (err, packages) {
         test.ok(
             /No package for 'baz'/.test(err.message),
             "No package for 'baz'"
