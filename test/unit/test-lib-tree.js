@@ -1,4 +1,150 @@
-var tree = require('../../lib/tree');
+var tree = require('../../lib/tree'),
+    logger = require("../../lib/logger");
+
+exports['build - fall!!!'] = function (test) {
+    test.expect(1);
+
+    logger.level = "verbose";
+
+    var translation = {
+        'git://path.to/repo.git': '1.0.5'
+    };
+
+    var foo = {
+        config: {
+            name: 'root',
+            version: '0.0.1',
+            jam: {
+                dependencies: {
+                    'toolkit':  'git://path.to/repo.git',
+                    'viewer':   '0.1.0',
+                    'injector': '2.0.0'
+                }
+            }
+        },
+        source: 'local',
+        priority: 0
+    };
+
+    var sources = [
+        // aka git source
+        function (def, callback) {
+            if (def.name == "toolkit" && def.range == "git://path.to/repo.git") {
+                setTimeout(function() {
+                    callback(null, [
+                        {
+                            config: {
+                                name:    def.name,
+                                version: def.translation,
+                                jam: {
+                                    dependencies: {
+                                        "injector": "2.0.0"
+                                    }
+                                }
+                            },
+                            source: 'git',
+                            version: def.translation
+                        }
+                    ]);
+                }, 500);
+            } else {
+                process.nextTick(function() {
+                    callback(null, []);
+                })
+            }
+        },
+        // aka other
+        function (def, callback) {
+            var result;
+
+            switch (def.name) {
+                case "viewer": {
+                    result = [{
+                        config: {
+                            name:    def.name,
+                            version: def.range,
+                            jam: {
+                                dependencies: {
+                                    toolkit: "~1.0.0"
+                                }
+                            }
+                        },
+                        source: 'repository',
+                        version: def.range
+                    }];
+
+                    break;
+                }
+
+                case "toolkit": {
+                    result = [{
+                        config: {
+                            name:    def.name,
+                            version: "1.0.0",
+                            jam: {
+                                dependencies: {
+                                    "injector": "1.0.0"
+                                }
+                            }
+                        },
+                        source: 'repository',
+                        version: "1.0.0"
+                    }];
+
+                    break;
+                }
+
+                case "injector": {
+                    result = [
+                        {
+                            config: {
+                                name:    def.name,
+                                version: "1.0.0"
+                            },
+                            source: 'repository',
+                            version: "1.0.0"
+                        },
+                        {
+                            config: {
+                                name:    def.name,
+                                version: "2.0.0"
+                            },
+                            source: 'repository',
+                            version: "2.0.0"
+                        }
+                    ];
+
+                    break;
+                }
+            }
+
+            process.nextTick(function () {
+                callback(null, result);
+            });
+        }
+    ];
+    var translators = [
+        function(range, cb) {
+            var result;
+
+            if (result = translation[range]) {
+                return setTimeout(function() {
+                    cb(null, result);
+                }, 500);
+            }
+
+            cb(null);
+        }
+    ];
+
+    tree.build(foo, sources, translators, function (err, packages) {
+        // console.log('packages', require('json-honey')(packages));
+        test.ok(1);
+        test.done(err);
+    });
+};
+
+return;
 
 
 exports['extend - install new - reduce dep version'] = function (test) {
