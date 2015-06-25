@@ -46,7 +46,7 @@ exports['build - should work with async sources'] = function (test) {
                             version: def.translation
                         }
                     ]);
-                }, 500);
+                }, 100);
             } else {
                 process.nextTick(function() {
                     callback(null, []);
@@ -130,7 +130,7 @@ exports['build - should work with async sources'] = function (test) {
             if (result = translation[def.range]) {
                 return setTimeout(function() {
                     cb(null, result);
-                }, 500);
+                }, 100);
             }
 
             cb(null);
