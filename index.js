@@ -7,6 +7,7 @@ var ls = require('./lib/commands/ls'),
     upgrade = require('./lib/commands/upgrade'),
     rebuild = require('./lib/commands/rebuild'),
     remove = require('./lib/commands/remove'),
+    publish = require('./lib/commands/publish'),
     repository= require('./lib/repository'),
     logger = require('./lib/logger'),
     jamrc = require('./lib/jamrc'),
@@ -212,5 +213,54 @@ exports.rebuild = function (pdir, callback) {
             opt = install.extendOptions(pdir, settings, cfg, opt);
             rebuild.rebuild(settings, cfg, opt, callback);
         });
+    });
+};
+
+/**
+ * Publish package
+ * available inside the package directory.
+ *
+ * @param {object} config - the project directory (where package.json is)
+ * @param {string} [config.dir]
+ * @param {string} [config.repo]
+ * @param {object} [config.options]
+ * @param {Function} callback(err)
+ */
+
+exports.publish = function(config, callback) {
+    var repo, dir, flow, params;
+
+    flow = {};
+    params = {};
+
+    params.dir = options.dir || ".";
+
+    repo = options.repo;
+    if (!repo && process.env.JAM_TEST && !(repo = process.env.JAM_TEST_DB)) {
+        return callback(new Error('JAM_TEST environment variable set, but no JAM_TEST_DB set'));
+    }
+
+    if (!repo) {
+        flow.repo = function(next) {
+            jamrc.load(function(err, settings) {
+                if (err) {
+                    return next(err);
+                }
+
+                next(null, settings.repositories[0]);
+            });
+        };
+    } else {
+        params.repo = repo;
+    }
+
+    async.parallel(flow, function(err, results) {
+        if (err) {
+            return callback(err);
+        }
+
+        _.extend(params, results);
+
+        publish.publish('package', params.repo, params.dir, _.omit(options, "repo", "dir"), callback);
     });
 };
