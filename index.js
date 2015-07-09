@@ -228,14 +228,19 @@ exports.rebuild = function (pdir, callback) {
  */
 
 exports.publish = function(config, callback) {
-    var repo, dir, flow, params;
+    var repo, flow, params;
+
+    if (_.isFunction(config)) {
+        callback = config;
+        config = {};
+    }
 
     flow = {};
     params = {};
 
-    params.dir = options.dir || ".";
+    params.dir = config.dir || ".";
 
-    repo = options.repo;
+    repo = config.repo;
     if (!repo && process.env.JAM_TEST && !(repo = process.env.JAM_TEST_DB)) {
         return callback(new Error('JAM_TEST environment variable set, but no JAM_TEST_DB set'));
     }
@@ -261,6 +266,6 @@ exports.publish = function(config, callback) {
 
         _.extend(params, results);
 
-        publish.publish('package', params.repo, params.dir, _.omit(options, "repo", "dir"), callback);
+        publish.publish('package', params.repo, params.dir, config.options || {}, callback);
     });
 };
