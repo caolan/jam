@@ -223,6 +223,7 @@ exports.rebuild = function (pdir, callback) {
  * @param {object} config - the project directory (where package.json is)
  * @param {string} [config.dir]
  * @param {string} [config.repo]
+ * @param {string} [config.level]
  * @param {object} [config.options]
  * @param {Function} callback(err)
  */
@@ -233,6 +234,10 @@ exports.publish = function(config, callback) {
     if (_.isFunction(config)) {
         callback = config;
         config = {};
+    }
+
+    if (_.isString(config.level)) {
+        logger.level = config.level;
     }
 
     flow = {};
