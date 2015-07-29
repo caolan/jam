@@ -8,25 +8,38 @@ var sinon = require('sinon'),
     chance = require('chance')(),
     _ = require('underscore'),
     logger = require('../../lib/logger'),
+    cuculus = require('cuculus'),
     git,
-    mkdirp, rimraf, mkdirpCache, rimrafCache;
+    mkdirp, rimraf;
 
 logger.clean_exit = true;
 
-// stub function modules before they will be loaded by dm
-require("mkdirp");
-require("rimraf");
-mkdirpCache = path.resolve("../node_modules/mkdirp/index.js");
-rimrafCache = path.resolve("../node_modules/rimraf/rimraf.js");
-mkdirp = require.cache[mkdirpCache].exports = sinon.spy(function(path, callback) {
-    callback(null);
-});
-rimraf = require.cache[rimrafCache].exports = sinon.spy(function(path, callback) {
-    callback(null);
-});
 
-// now require git
-git = require('../../lib/git');
+exports.setUp = function(cb) {
+    cuculus.drop('mkdirp');
+    cuculus.drop('rimraf');
+    cuculus.drop(path.resolve(__dirname, '../../lib/git'));
+
+    mkdirp = sinon.spy(function(path, callback) { callback(null); });
+    cuculus.replace('mkdirp', mkdirp);
+
+    rimraf = sinon.spy(function(path, callback) { callback(null); });
+    cuculus.replace('rimraf', rimraf);
+
+    // now require git
+    git = require('../../lib/git');
+
+    cb();
+};
+
+exports.tearDown = function(cb) {
+    // cleanup
+    cuculus.drop('mkdirp');
+    cuculus.drop('rimraf');
+    cuculus.drop(path.resolve(__dirname, '../../lib/git'));
+
+    cb();
+};
 
 
 exports['get - should throw error when uri is not valid'] = function (test) {
@@ -128,7 +141,7 @@ exports['get - should not call git clone, but fetch, if there cached remote'] = 
         test.ok(repository instanceof git.Repository);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], "git fetch --tags");
+        test.equals(exec.firstCall.args[0], "git fetch && git fetch --tags");
 
         test.equals(stat.callCount, 1);
         test.equals(stat.firstCall.args[0], repository.path);
@@ -386,7 +399,7 @@ exports['repository.fetch - should call git fetch'] = function (test) {
         test.ok(!err);
 
         test.equals(exec.callCount, 1);
-        test.equals(exec.firstCall.args[0], 'git fetch --tags');
+        test.equals(exec.firstCall.args[0], 'git fetch && git fetch --tags');
         test.same(exec.firstCall.args[1], { cwd: path });
 
         exec.restore();
@@ -667,6 +680,3 @@ exports['cleanup - should rimraf all temp folders'] = function (test) {
     });
 };
 
-// cleanup
-delete require.cache[mkdirpCache];
-delete require.cache[rimrafCache];

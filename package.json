@@ -1,6 +1,6 @@
 {
   "name": "jamjs",
-  "version": "0.5.1-rc.2",
+  "version": "0.5.2",
   "description": "",
   "maintainers": [
     {
@@ -35,6 +35,7 @@
     "underscore": "~1.8.3"
   },
   "devDependencies": {
+    "cuculus": "^0.3.3",
     "nodeunit": "0.7.4",
     "sinon": "^1.14.1"
   },

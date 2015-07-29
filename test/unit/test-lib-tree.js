@@ -3,6 +3,102 @@ var tree = require('../../lib/tree'),
 
 //logger.level = "verbose";
 
+
+
+exports['build - should work when multiple git links'] = function (test) {
+    test.expect(1);
+
+    var translation = {
+        'git://path.to/repo.git': '1.0.5'
+    };
+
+    var foo = {
+        config: {
+            name: 'root',
+            version: '0.0.1',
+            jam: {
+                dependencies: {
+                    'toolkit':  'git://path.to/repo.git',
+                    'viewer':   '0.1.0'
+                }
+            }
+        },
+        source: 'local',
+        priority: 0
+    };
+
+    var sources = [
+        // aka git source
+        function (def, callback) {
+            if (def.name == "toolkit" && def.range == "git://path.to/repo.git") {
+                callback(null, [
+                    {
+                        config: {
+                            name:    def.name,
+                            version: def.translation,
+                            jam: {}
+                        },
+                        source: 'git',
+                        version: def.translation
+                    }
+                ]);
+            } else {
+                callback(null, []);
+            }
+        },
+        // aka other
+        function (def, callback) {
+            var result;
+
+            switch (def.name) {
+                case "viewer": {
+                    result = [{
+                        config: {
+                            name:    def.name,
+                            version: def.range,
+                            jam: {
+                                dependencies: {
+                                    toolkit: "git://path.to/repo.git"
+                                }
+                            }
+                        },
+                        source: 'repository',
+                        version: def.range
+                    }];
+
+                    break;
+                }
+            }
+
+            process.nextTick(function () {
+                callback(null, result);
+            });
+        }
+    ];
+    var translators = [
+        function(def, cb) {
+            var result;
+
+            if (result = translation[def.range]) {
+                return setTimeout(function() {
+                    cb(null, result);
+                }, 100);
+            }
+
+            cb(null);
+        }
+    ];
+
+    tree.build(foo, sources, translators, function (err, packages) {
+        //console.log('packages', require('json-honey')(packages));
+        test.ok(1);
+        test.done(err);
+    });
+};
+
+
+
+
 exports['build - should work with async sources'] = function (test) {
     test.expect(1);
 
