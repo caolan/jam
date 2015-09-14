@@ -1,6 +1,6 @@
 {
   "name": "jamjs",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "",
   "maintainers": [
     {
@@ -13,7 +13,6 @@
     }
   ],
   "dependencies": {
-    "almond": "0.2.5",
     "async": "~0.1.21",
     "chance": "^0.7.3",
     "fstream": "~0.1.18",
@@ -27,16 +26,19 @@
     "ncp": "~0.2.6",
     "prompt": "0.2.1",
     "request": "~2.9.202",
-    "requirejs": "2.1.4",
     "rimraf": "~2.0.1",
     "schinquirer": "^0.1.1",
     "semver": "~4.3.3",
     "tar": "~0.1.13",
     "underscore": "~1.8.3"
   },
+  "peerDependencies": {
+    "requirejs": "2.1.4",
+    "almond": "0.2.5"
+  },
   "devDependencies": {
     "cuculus": "^0.3.3",
-    "nodeunit": "0.9.1",
+    "nodeunit": "0.7.4",
     "sinon": "^1.14.1"
   },
   "repository": {
