@@ -1,7 +1,37 @@
-var install = require('../../lib/commands/install'),
-    logger = require("../../lib/logger");
+var install = require('../../lib/commands/install');
+var logger = require("../../lib/logger");
+var sinon = require("sinon");
+var cuculus = require("cuculus");
+var path = require("path");
 
 //logger.clean_exit = true;
+
+
+exports.setUp = function(cb) {
+    cuculus.modify(path.resolve(__dirname, '../../lib/jamrc'), function(jamrc, onRestore){
+        var stub;
+
+        stub = sinon.stub(jamrc, "load", function(cb) {
+            cb(null, {
+                repositories: [
+                    "http://jamjs.org/A",
+                    "http://jamjs.org/B",
+                    "http://jamjs.org/C"
+                ]
+            });
+        });
+
+        onRestore(stub.restore.bind(stub));
+    });
+
+    cb();
+};
+
+exports.tearDown = function(cb) {
+    // cleanup
+    cuculus.restore(path.resolve(__dirname, '../../lib/jamrc'));
+    cb();
+};
 
 exports['extractValidVersion - multiple git'] = function (test) {
     var pkg;
@@ -82,7 +112,7 @@ exports['extractValidVersion - multiple git'] = function (test) {
     });
 };
 
-exports['extractValidVersion - multiple repo'] = function (test) {
+exports['extractValidVersion - should get less prioritized, if it is repository source'] = function (test) {
     var pkg;
 
     // before
@@ -108,8 +138,8 @@ exports['extractValidVersion - multiple repo'] = function (test) {
             {
                 "priority": 0,
                 "source":   "repository",
-                "repository": "a",
                 "version":  "1.0.5",
+                "repository": "http://jamjs.org/B",
                 "config": {
                     "name":    "toolkit",
                     "version": "1.0.5",
@@ -119,8 +149,19 @@ exports['extractValidVersion - multiple repo'] = function (test) {
             {
                 "priority": 0,
                 "source":   "repository",
-                "repository": "b",
                 "version":  "1.0.5",
+                "repository": "http://jamjs.org/A",
+                "config": {
+                    "name":    "toolkit",
+                    "version": "1.0.5",
+                    "jam": {}
+                }
+            },
+            {
+                "priority": 0,
+                "source":   "repository",
+                "version":  "1.0.5",
+                "repository": "http://jamjs.org/C",
                 "config": {
                     "name":    "toolkit",
                     "version": "1.0.5",
@@ -130,9 +171,12 @@ exports['extractValidVersion - multiple repo'] = function (test) {
         ]
     };
 
-    install.extractValidVersion(pkg, "test", function(err) {
+    install.extractValidVersion(pkg, "test", function(err, version) {
         if (err) {
             logger.error(err);
+        }
+        if (version.repository != "http://jamjs.org/A") {
+            logger.error(err = new Error("Not prioritized repo!"))
         }
         test.done(err);
     });
