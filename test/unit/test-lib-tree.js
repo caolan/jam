@@ -310,7 +310,7 @@ exports['extend - install new - reduce dep version'] = function (test) {
                 current_version: '0.0.2',
                 requirements: [
                     {
-                        path: { parents: [ 'bar' ], name: 'foo', enabled: true },
+                        path: { parents: [ 'bar' ], name: 'foo' },
                         range: { range: '<= 0.0.2', source: '<= 0.0.2' },
                         enabled: true
                     }
@@ -420,7 +420,7 @@ exports['extend - reinstall existing - increase dep version'] = function (test) 
                 current_version: '0.0.3',
                 requirements: [
                     {
-                        path: { parents: [ 'bar' ], name: 'foo', enabled: true },
+                        path: { parents: [ 'bar' ], name: 'foo' },
                         range: { range: '> 0.0.2', source: '> 0.0.2' },
                         enabled: true
                     }
@@ -641,7 +641,7 @@ exports['build - fetch from sources'] = function (test) {
                 ],
                 requirements: [
                     {
-                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        path: { parents: [ 'foo' ], name: 'bar' },
                         range: { range: '>= 0.0.2', source: '>= 0.0.2' },
                         enabled: true
                     }
@@ -742,7 +742,7 @@ exports['build - translate from translators'] = function (test) {
                 ],
                 requirements: [
                     {
-                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        path: { parents: [ 'foo' ], name: 'bar' },
                         range: { range: '0.0.2', source: 'abc' },
                         enabled: true
                     }
@@ -968,7 +968,7 @@ exports['build - check multiple sources'] = function (test) {
                 ],
                 requirements:  [
                     {
-                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        path: { parents: [ 'foo' ], name: 'bar' },
                         range: { range: '>= 0.0.2', source: '>= 0.0.2' },
                         enabled: true
                     }
@@ -1137,7 +1137,7 @@ exports['build - check only as many sources as needed'] = function (test) {
                 ],
                 requirements: [
                     {
-                        path: { parents: [ 'foo' ], name: 'bar', enabled: true },
+                        path: { parents: [ 'foo' ], name: 'bar' },
                         range: { range: '>= 0.0.3', source: '>= 0.0.3' },
                         enabled: true
                     }
