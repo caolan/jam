@@ -23,7 +23,7 @@ Unlike other repositories, we put the **browser** first.
 
 ## Example usage
 
-    $ jam install jquery
+    $ jam install jquery --save
 
 
 ```html
