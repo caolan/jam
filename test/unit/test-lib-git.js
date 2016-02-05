@@ -193,7 +193,7 @@ exports['repository.log - should call git log and return normalized results'] = 
         callback(null, gitLog.map(function(c) { return c.hash; }).join("\n") + "\n");
     });
 
-    repository.log(function(err, log) {
+    repository._log(function(err, log) {
         test.ok(!err);
         test.ok(_.isArray(log));
 
@@ -255,7 +255,7 @@ exports['repository.ref - should call git show-refs and return normalized result
         callback(null, gitRefs.join("\n") + "\n");
     });
 
-    repository.ref(function(err, refs) {
+    repository._ref(function(err, refs) {
         test.ok(!err);
         test.ok(_.isArray(refs));
 
@@ -537,14 +537,14 @@ exports['repository.resolve - should search in logs and refs given spec'] = func
     specRemote.type = git.Commitish.REMOTE;
     specRemote.remote = chance.word();
 
-    ref = sinon.stub(repository, "ref", function(callback) {
+    ref = sinon.stub(repository, "_ref", function(callback) {
         callback(null, [
             new git.Commitish(chance.word(), git.Commitish.HEAD, specHead.value),
             new git.RemoteCommitish(chance.word(), git.Commitish.REMOTE, specRemote.value, specRemote.remote)
         ]);
     });
 
-    log = sinon.stub(repository, "log", function(callback) {
+    log = sinon.stub(repository, "_log", function(callback) {
         callback(null, [ new git.Commitish(specCommit.value, git.Commitish.COMMIT, specCommit.value) ]);
     });
 
