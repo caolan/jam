@@ -255,4 +255,4 @@ packages, consult the [Jam documentation website](http://jamjs.org/docs).
 
 * [Homepage](http://jamjs.org)
 * [Packages](http://jamjs.org/packages/)
-* [Docs](http://jamjs.org/doc)
+* [Docs](http://jamjs.org/docs)
