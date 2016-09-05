@@ -1,4 +1,12 @@
-***NOTE: this project is no longer active and not recommended for use. It is left here for reference. ***
+****NOTE: this project is no longer active and not recommended for use. It is left here for reference. ****
+
+Jam was created at a time before Bower and provided a (still to this day) very nice installation workflow which meant you could 'jam install jquery', then immediately 'require("jquery")' in your application. No manual bundling or build step (e.g. browserify, webpack) required. This was thanks in large part to the power and flexibility of the [AMD format](http://requirejs.org/docs/whyamd.html).
+
+Since it's creation, NPM has set it's sights more firmly on the browser space, and the popularity of the AMD module format is waning. Jam never really got enough traction to compete. Thanks to everone that helped out and gave it a try.
+
+If you want to try hosting your own Jam repository, see the [repositories](#repositories) section below. The public Jam repository is now retired.
+
+---
 
 # Jam
 
