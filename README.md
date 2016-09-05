@@ -1,3 +1,5 @@
+***NOTE: this project is no longer active and not recommended for use. It is left here for reference. ***
+
 # Jam
 
 For **front-end** developers who crave maintainable assets,
