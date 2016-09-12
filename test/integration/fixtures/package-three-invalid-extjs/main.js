@@ -1,3 +1,3 @@
-deifne(['exports'], function (exports) {
+define(['exports'], function (exports) {
     exports.name = 'Package Three';
 });
