@@ -1,0 +1,19 @@
+
+{
+  "title": "JSON schema for NPM package.json files",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "type": "object",
+  "required": [ "name", "version" ],
+
+  "properties": {
+    "name": {
+      "description": "The name of the package.",
+      "type": "string"
+    },
+    "version": {
+      "description": "Version must be parseable by node-semver, which is bundled with npm as a dependency.",
+      "type": "string"
+    }
+  }
+}

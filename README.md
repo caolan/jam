@@ -33,7 +33,7 @@ Unlike other repositories, we put the **browser** first.
 
 ## Example usage
 
-    $ jam install jquery
+    $ jam install jquery --save
 
 
 ```html
@@ -73,6 +73,33 @@ configuration here:
           "paths": {
             "templates": "public/templates"
           }
+        }
+    }
+}
+```
+
+### Git URLs as Dependencies
+
+Git urls can be of the form:
+
++ git://github.com/user/project.git#commit-ish
++ git+ssh://user@hostname:project.git#commit-ish
++ git+ssh://user@hostname/project.git#commit-ish
++ git+http://user@hostname/project/blah.git#commit-ish
++ git+https://user@hostname/project/blah.git#commit-ish
+
+The commit-ish can be any tag, sha, or branch which can be supplied as an argument to git checkout. The default is master.
+
+```javascript
+{
+    "name": "my-project",
+    "version": "0.0.1",
+    "description": "My example project",
+    "jam": {
+        "baseUrl": "public",
+        "packageDir": "public/vendor",
+        "dependencies": {
+            "feature": "git://github.com/user/project.git#0.2.3"
         }
     }
 }
@@ -138,7 +165,7 @@ exports.repositories = [
 See the section below on running your own repository.
 
 
-### package\_dir
+#### package_dir
 
 Sets the default package installation directory (normally uses `./jam`). This
 is best customized in your project-level package.json file, to ensure other
@@ -148,6 +175,14 @@ developers also install to the correct location.
 exports.package_dir = 'libs';
 ```
 
+#### strict
+
+Puts jam into strict mode. In this mode, during installation, subpackages versions checked to be strict.
+If not - the must be hoisted to the root package with strict version declaration.
+
+#### production
+
+Puts jam into production mode. In this mode, during installation, dependencies sources are restricted to be repository.
 
 ## Running the tests
 
